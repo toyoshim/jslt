@@ -9,9 +9,19 @@
 assert = require('assert');
 MD5 = require('./MD5').MD5;
 
-assert(MD5);
-assert(MD5.createDigestBinary);
-assert(MD5.createDigestString);
+var version = process.versions.node.split('.');
+if ((version[0] < 1) &&
+        ((version[1] < 5) || ((version[1] == 5) && version[2] < 5))) {
+    // version < 0.5.5
+    ArrayBuffer = require('./ArrayBuffer').ArrayBuffer;
+    DataView = require('./ArrayBuffer').DataView;
+    Uint8Array = require('./ArrayBuffer').Uint8Array;
+    Uint32Array = require('./ArrayBuffer').Uint32Array;
+}
+
+assert.ok(MD5);
+assert.ok(MD5.createDigestBinary);
+assert.ok(MD5.createDigestString);
 console.log('[PASS] import test');
 
 var x = 0x01234567;
