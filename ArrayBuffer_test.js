@@ -9,6 +9,7 @@
 assert = require('assert');
 ArrayBuffer = require('./ArrayBuffer').ArrayBuffer;
 DataView = require('./ArrayBuffer').DataView;
+Uint8Array = require('./ArrayBuffer').Uint8Array;
 Uint32Array = require('./ArrayBuffer').Uint32Array;
 
 assert.ok(ArrayBuffer);

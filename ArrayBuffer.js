@@ -7,7 +7,7 @@
 /**
  * Pseudo ArrayBuffer.
  * @author Takashi Toyoshima <toyoshim@gmail.com>
- * @param length {number} Buffer length.
+ * @param length {Number} Buffer length.
  * @constructor
  */
 function ArrayBuffer (length) {
@@ -227,6 +227,7 @@ function Uint8Array () {
     var buffer = null;
     var byteOffset = 0;
     var length = 0;
+    var i;
     if ((typeof arguments[0]) == "number") {
         /**
          * constructor (length)
@@ -241,7 +242,7 @@ function Uint8Array () {
          */
         length = arguments[0].length;
         buffer = new ArrayBuffer(length);
-        for (var i = 0; i < length; i++)
+        for (i = 0; i < length; i++)
             buffer.__buffer__[i] = arguments[0][i] & 0xff;
     } else if (arguments[0].constructor.name == "ArrayBuffer") {
         /**
@@ -258,6 +259,15 @@ function Uint8Array () {
             if (arguments.length > 2 && length > arguments[2])
                 length = arguments[2];
         }
+    } else if (arguments[0].constructor.name == "Buffer") {
+        /**
+         * constructor (buffer)
+         * @param {Buffer} buffer
+         */
+        length = arguments[0].length;
+        buffer = new ArrayBuffer(length);
+        for (i = 0; i < length; i++)
+            buffer.__buffer__[i] = arguments[0][i] & 0xff;
     } else {
         throw new Error('Uint8Array unsupported type ' +
             arguments[0].constructor.name)
