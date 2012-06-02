@@ -106,8 +106,9 @@ DNS.prototype.resolve = function (hostname, callback) {
     if (this._ready)
         this._resolve(hostname, callback);
     else {
+        var self = this;
         this._retry = function () {
-            this._resolve(hostname, callback);
+            self._resolve(hostname, callback);
         };
     }
 };
@@ -121,8 +122,9 @@ DNS.prototype.resolveA = function (hostname, callback) {
     if (this._ready)
         this._resolveA(hostname, callback);
     else {
+        var self = this;
         this._retry = function () {
-            this._resolveA(hostname, callback);
+            self._resolveA(hostname, callback);
         };
     }
 };
