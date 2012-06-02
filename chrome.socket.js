@@ -87,6 +87,11 @@ chrome.socket.bind = function (socketId, address, port, callback) {
     }
 };
 
+/**
+ * Handles buffered data and callback internally.
+ * @param socketId {Number} The socketId.
+ * @private
+ */
 chrome.socket._recvFrom = function (socketId) {
     if (!chrome.socket._id.callback[socketId] ||
             chrome.socket._id.messages[socketId].length == 0)
@@ -131,7 +136,7 @@ chrome.socket.recvFrom = function(socketId, bufferSize, callback) {
 chrome.socket.sendTo = function(socketId, data, address, port, callback) {
     if (!chrome.socket._id.map[socketId])
         throw new Error('Socket not found');
-    var buffer = new Buffer(data);
+    var buffer = new Buffer(new Uint8Array(data));
     chrome.socket._id.map[socketId].send(buffer, 0, buffer.length, port,
             address, function (err, bytes) {
         if (err)

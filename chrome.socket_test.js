@@ -43,7 +43,8 @@ socket.create("udp", {}, function(socketInfo) {
         data[1] = 'e'.charCodeAt(0);
         data[2] = 'l'.charCodeAt(0);
         data[3] = 'o'.charCodeAt(0);
-        socket.sendTo(id, data, "192.168.12.1", 7, function (writeInfo) {
+        console.log("try to connect echo server at 192.168.12.1");
+        socket.sendTo(id, data.buffer, "192.168.12.1", 7, function (writeInfo) {
             console.log('[PASS] udp sendTo');
             console.log(writeInfo);
             assert.ok(writeInfo);
@@ -65,9 +66,8 @@ socket.create("udp", {}, function(socketInfo) {
                 assert.equal('l'.charCodeAt(0), data[2]);
                 assert.equal('o'.charCodeAt(0), data[3]);
                 socket.destroy(id);
+                console.log('[PASS] all test');
             });
         });
     });
 });
-
-console.log('[PASS] all test');
