@@ -100,9 +100,9 @@ DataView.prototype.setUint32 = function (byteOffset, value, littleEndian) {
 };
 
 /**
- * Gets Uint8, Int8, and Uint32 value at offset |byteOffset| of bytes. Loads it
- * in little endian format if |littleEndian| is true. Otherwise in big endian
- * format.
+ * Gets Uint8, Int8, Uint16, and Uint32 value at offset |byteOffset| of bytes.
+ * Loads it in little endian format if |littleEndian| is true. Otherwise in big
+ * endian format.
  * @param byteOffset {number} Offset in bytes.
  * @param littleEndian {boolean} Little endian or not.
  * @return {number} Value.
@@ -115,6 +115,19 @@ DataView.prototype.getInt8 = function (byteOffset) {
     if (value < 0x80)
         return value;
     return value - 0x100;
+};
+DataView.prototype.getUint16 = function (byteOffset, littleEndian) {
+    if (arguments.length < 2)
+        littleEndian = false;
+    var value = 0;
+    if (littleEndian) {
+        value = this.getUint8(byteOffset) |
+                (this.getUint8(byteOffset + 1) << 8);
+    } else {
+        value = this.getUint8(byteOffset + 1) |
+                (this.getUint8(byteOffset) << 8);
+    }
+    return value;
 };
 DataView.prototype.getUint32 = function (byteOffset, littleEndian) {
     if (arguments.length < 2)
