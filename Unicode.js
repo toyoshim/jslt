@@ -9,6 +9,7 @@
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  */
 Unicode = {};
+exports.Unicode = Unicode;
 
 /**
  * Check if the specified code is BMP.
@@ -25,7 +26,6 @@ Unicode._isBMP = function (code) {
         return true;
     return false;
 };
-exports.Unicode = Unicode;
 
 /**
  * Check if the specified code is the first code of surrogate pair.
