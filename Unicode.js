@@ -31,7 +31,6 @@ Unicode._isBMP = function (code) {
  * Check if the specified code is the first code of surrogate pair.
  * @param code {number} character code in UTF-16.
  * @return {boolean} true if the code is the first code of surrogate pair.
- * @private
  */
 Unicode.isHighSurrogates = function (code) {
     if ((0xd800 <= code) && (code < 0xdc00))
@@ -43,7 +42,6 @@ Unicode.isHighSurrogates = function (code) {
  * Check if the specified code is the second code of surroage pair.
  * @param code {number} character code in UTF-16.
  * @return {boolean} true if the code is the second code of surrogate pair.
- * @private
  */
 Unicode.isLowSurrogates = function (code) {
     if ((0xdc00 <= code) && (code < 0xe000))
@@ -57,9 +55,8 @@ Unicode.isLowSurrogates = function (code) {
  * @param second {number} the second code of a pair.
  * @return {number} Unicode.
  * @raise {RangeError} when the specified code pair is an invalid pair.
- * @private
  */
-Unicode.decodeSurrogatesPair = function (first, second) {
+Unicode.decodeSurrogatePair = function (first, second) {
     if (!Unicode.isHighSurrogates(first) || !Unicode.isLowSurrogates(second))
         throw new RangeError('invalid surrogate pair (' + first + ', ' +
                 second + ')');
@@ -181,7 +178,7 @@ Unicode.createUTF8ArrayBufferFromString = function (data) {
         if (!Unicode._isBMP(code)) {
             if (++i >= data.length)
                 throw new RangeError('invalid surrogate pair: EOD');
-            code = Unicode.decodeSurrogatesPair(code, String.charCodeAt(i));
+            code = Unicode.decodeSurrogatePair(code, String.charCodeAt(i));
         }
         offset += Unicode._setUnicode(array, offset, code);
     }
