@@ -33,7 +33,7 @@ Unicode._isBMP = function (code) {
  * @return {boolean} true if the code is the first code of surrogate pair.
  * @private
  */
-Unicode._isHighSurrogates = function (code) {
+Unicode.isHighSurrogates = function (code) {
     if ((0xd800 <= code) && (code < 0xdc00))
         return true;
     return false;
@@ -45,7 +45,7 @@ Unicode._isHighSurrogates = function (code) {
  * @return {boolean} true if the code is the second code of surrogate pair.
  * @private
  */
-Unicode._isLowSurrogates = function (code) {
+Unicode.isLowSurrogates = function (code) {
     if ((0xdc00 <= code) && (code < 0xe000))
         return true;
     return false;
@@ -59,8 +59,8 @@ Unicode._isLowSurrogates = function (code) {
  * @raise {RangeError} when the specified code pair is an invalid pair.
  * @private
  */
-Unicode._decodeSurrogatePair = function (first, second) {
-    if (!Unicode._isHighSurrogates(first) || !Unicode._isLowSurrogates(second))
+Unicode.decodeSurrogatesPair = function (first, second) {
+    if (!Unicode.isHighSurrogates(first) || !Unicode.isLowSurrogates(second))
         throw new RangeError('invalid surrogate pair (' + first + ', ' +
                 second + ')');
     var w = (first >> 6) & 0xf;
@@ -108,7 +108,7 @@ Unicode._countString = function (data) {
         if (!Unicode._isBMP(code)) {
             if (++i >= data.length)
                 throw new RangeError('invalid surrogate pair: EOD');
-            code = Unicode._decodeSurrogatePair(code, String.charCodeAt(i));
+            code = Unicode.decodeSurrogatePair(code, String.charCodeAt(i));
         }
         length += Unicode._bytesInUTF8(code);
     }
@@ -181,7 +181,7 @@ Unicode.createUTF8ArrayBufferFromString = function (data) {
         if (!Unicode._isBMP(code)) {
             if (++i >= data.length)
                 throw new RangeError('invalid surrogate pair: EOD');
-            code = Unicode._decodeSurrogatePair(code, String.charCodeAt(i));
+            code = Unicode.decodeSurrogatesPair(code, String.charCodeAt(i));
         }
         offset += Unicode._setUnicode(array, offset, code);
     }
