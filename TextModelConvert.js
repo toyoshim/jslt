@@ -44,6 +44,16 @@ TextModelConvert.createFromString = function (text) {
 };
 
 /**
+ * Create TextModel from ArrayBuffer in UTF-8.
+ * @param text {ArrayBuffer} input ArrayBuffer in UTF-8.
+ * @return {Object} Created TextModel object.
+ */
+TextModelConvert.createFromArrayBuffer = function (text) {
+    return TextModelConvert.createFromString(
+            Unicode.createStringFromUTF8ArrayBuffer(text));
+};
+
+/**
  * Create a string from TextModel.
  * @param model {Object} input TextModel.
  * @return {string} A string that TextModel contains.
@@ -60,4 +70,39 @@ TextModelConvert.createString = function (model) {
         lineArray.push(rowArray.join(''));
     }
     return lineArray.join('\n');
+};
+
+/**
+ * Create an ArrayBuffer that contains the TextModel contents in UTF-8.
+ * @param model {Object} An created ArrayBuffer object.
+ */
+TextModelConvert.createArrayBuffer = function (model) {
+    var lines = model.getLineLength();
+    var bytes = -1;  // offset for the last line LF.
+    for (var line = 0; line < lines; ++line) {
+        var list = model.atLine(line);
+        var rows = list.getLength();
+        for (var row = 0; row < rows; ++row)
+            bytes += Unicode.countUTF8Length(list.at(row).character);
+        bytes++;  // for LF
+    }
+    var result = new ArrayBuffer(bytes);
+    var out = new Uint8Array(result);
+    var offset = 0;
+    for (line = 0; line < lines; ++line) {
+        list = model.atLine(line);
+        rows = list.getLength();
+        for (row = 0; row < rows; ++row) {
+            var ab = Unicode.createUTF8ArrayBufferFromString(
+                    list.at(row).character);
+            var u8 = new Uint8Array(ab);
+            var length = ab.byteLength;
+            for (var i = 0; i < length; ++i)
+                out[offset + i] = u8[i];
+            offset += length;
+        }
+        if (line + 1 < lines)
+            out[offset++] = 0x0a;  // LF
+    }
+    return result;
 };

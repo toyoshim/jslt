@@ -33,23 +33,38 @@ console.log('[PASS] convert from simple surrogate string');
 
 var hello ='こんにちは\n🐱\n世界';
 var model3 = TextModelConvert.createFromString(hello);
-assert.ok(model3);
-assert.equal(model3.getLineLength(), 3);
-assert.equal(model3.getRowLength(), 2);  // 世界
-assert.equal(model3.at(), '界');
-model3.atLine(0);
-assert.equal(model3.getRowLength(), 5);  // こんにちは
-model3.atLine(1);
-assert.equal(model3.getRowLength(), 1);  // 🐱
-model3.atLine(2);
-assert.equal(model3.getRowLength(), 2);  // 世界
-assert.equal(model3.at(0, 0), 'こ');
-assert.equal(model3.at(0, 1), 'ん');
-assert.equal(model3.at(0, 2), 'に');
-assert.equal(model3.at(0, 3), 'ち');
-assert.equal(model3.at(0, 4), 'は');
-assert.equal(model3.at(1, 0), '🐱');
-assert.equal(model3.at(2, 0), '世');
-assert.equal(model3.at(2, 1), '界');
-assert.equal(TextModelConvert.createString(model3), hello);
+var checkHello = function (model) {
+    assert.ok(model);
+    assert.equal(model.getLineLength(), 3);
+    assert.equal(model.getRowLength(), 2);  // 世界
+    assert.equal(model.at(), '界');
+    model.atLine(0);
+    assert.equal(model.getRowLength(), 5);  // こんにちは
+    model.atLine(1);
+    assert.equal(model.getRowLength(), 1);  // 🐱
+    model.atLine(2);
+    assert.equal(model.getRowLength(), 2);  // 世界
+    assert.equal(model.at(0, 0), 'こ');
+    assert.equal(model.at(0, 1), 'ん');
+    assert.equal(model.at(0, 2), 'に');
+    assert.equal(model.at(0, 3), 'ち');
+    assert.equal(model.at(0, 4), 'は');
+    assert.equal(model.at(1, 0), '🐱');
+    assert.equal(model.at(2, 0), '世');
+    assert.equal(model.at(2, 1), '界');
+    assert.equal(TextModelConvert.createString(model), hello);
+};
+checkHello(model3);
 console.log('[PASS] convert from multi line string');
+
+var buffer = new Buffer(hello, 'utf8');
+var src = Unicode.createUTF8ArrayBufferFromString(hello);
+var model4 = TextModelConvert.createFromArrayBuffer(src);
+checkHello(model4);
+var dst = TextModelConvert.createArrayBuffer(model4);
+assert.equal(dst.byteLength, src.byteLength);
+var u8src = Uint8Array(src);
+var u8dst = Uint8Array(dst);
+for (var i = 0; i < src.byteLength; ++i)
+    assert.equal(u8dst[i], u8src[i]);
+console.log('[PASS] convert ArrayBuffer in UTF-8');
