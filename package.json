@@ -1,0 +1,14 @@
+{
+  "name": "jslt",
+  "version": "0.1.0",
+  "description": "A JavaScript library",
+  "scripts": {
+    "test": "./test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://code.google.com/p/jslt"
+  },
+  "author": "Takashi Toyoshima <toyoshim@gmail.com>",
+  "license": "New BSD License"
+}
