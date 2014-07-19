@@ -27,3 +27,12 @@ assert.ok(Unicode.isLowSurrogates(0xdfff));
 assert.ok(!Unicode.isLowSurrogates(0xe000));
 assert.ok(Unicode.isLowSurrogates(neko.charCodeAt(1)));
 console.log('[PASS] surrogate pair tests');
+
+var text = 'こんにちは🐱\n世界は丸い';
+var buffer = new Buffer(text, 'utf8');
+var ab = new ArrayBuffer(buffer.length);
+var u8 = new Uint8Array(ab);
+for (var i = 0; i < buffer.length; ++i)
+    u8[i] = buffer[i];
+assert.equal(Unicode.createStringFromUTF8ArrayBuffer(ab), text);
+console.log('[PASS] UTF8 to UTF16 conversion');

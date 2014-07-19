@@ -244,7 +244,7 @@ Unicode.createStringFromUTF8ArrayBuffer = function (data) {
             length--;
             if (0 == length) {
                 first = true;
-                if ((value < 0xd800) || (0xe000 <= value)) {
+                if (Unicode._isBMP(value)) {
                     result.push(String.fromCharCode(value));
                 } else {
                     var u = (value >> 16) & 0x1f;
