@@ -30,9 +30,14 @@ console.log('[PASS] surrogate pair tests');
 
 var text = 'こんにちは🐱\n世界は丸い';
 var buffer = new Buffer(text, 'utf8');
-var ab = new ArrayBuffer(buffer.length);
+var ab = Unicode.createUTF8ArrayBufferFromString(text);
 var u8 = new Uint8Array(ab);
 for (var i = 0; i < buffer.length; ++i)
-    u8[i] = buffer[i];
+    assert.equal(buffer[i], u8[i]);
 assert.equal(Unicode.createStringFromUTF8ArrayBuffer(ab), text);
-console.log('[PASS] UTF8 to UTF16 conversion');
+console.log('[PASS] UTF-8 to UTF-16 conversion');
+
+var ascii = 'Hello Unicode!';
+assert.equal(Unicode.countUTF8Length(ascii), ascii.length);
+assert.equal(Unicode.countUTF8Length(text), buffer.length);
+console.log('[PASS] count UTF-8 length');

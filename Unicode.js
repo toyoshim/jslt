@@ -98,14 +98,14 @@ Unicode._bytesInUTF8 = function (code) {
  * @param data {string} String object to count
  * @private
  */
-Unicode._countString = function (data) {
+Unicode.countUTF8Length = function (data) {
     var length = 0;
     for (var i = 0; i < data.length; ++i) {
         var code = data.charCodeAt(i);
         if (!Unicode._isBMP(code)) {
             if (++i >= data.length)
                 throw new RangeError('invalid surrogate pair: EOD');
-            code = Unicode.decodeSurrogatePair(code, String.charCodeAt(i));
+            code = Unicode.decodeSurrogatePair(code, data.charCodeAt(i));
         }
         length += Unicode._bytesInUTF8(code);
     }
@@ -170,7 +170,7 @@ Unicode._setUnicode = function (array, offset, code) {
  * @return {ArrayBuffer} created object.
  */
 Unicode.createUTF8ArrayBufferFromString = function (data) {
-    var size = Unicode._countString(data);
+    var size = Unicode.countUTF8Length(data);
     var array = new Uint8Array(size);
     var offset = 0;
     for (var i = 0; i < data.length; ++i) {
@@ -178,7 +178,7 @@ Unicode.createUTF8ArrayBufferFromString = function (data) {
         if (!Unicode._isBMP(code)) {
             if (++i >= data.length)
                 throw new RangeError('invalid surrogate pair: EOD');
-            code = Unicode.decodeSurrogatePair(code, String.charCodeAt(i));
+            code = Unicode.decodeSurrogatePair(code, data.charCodeAt(i));
         }
         offset += Unicode._setUnicode(array, offset, code);
     }
