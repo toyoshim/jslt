@@ -42,6 +42,8 @@ function ScreenModel (lines, rows, line, position) {
     }
     this._rows = rows;
     this._cursor = { line: 0, row: 0};
+    this.onMove = null;
+    this.onUpdateLine = null;
 }
 exports.ScreenModel = ScreenModel;
 
@@ -72,6 +74,8 @@ ScreenModel.prototype.insert = function (character) {
             line.insertCharacterAt(this._cursor.row++, character);
         }
         line.adoptWrapRules(this._rows, this._wrapRules);
+        if (this.onUpdateLine)
+            this.onUpdateLine(i);
         if (nextLine == line.getNextLine() ||
                 nextPosition == line.getNextLinePosition())
             break;
@@ -82,6 +86,8 @@ ScreenModel.prototype.insert = function (character) {
         this._lines[i + 1].updateContents(
                 this._rows, line.getNextLine(), line.getNextLinePosition());
     }
+    if (this.onMove)
+        this.onMove(this._cursor.line, this._cursor.row);
 };
 
 /**
