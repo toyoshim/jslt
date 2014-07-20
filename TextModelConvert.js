@@ -40,6 +40,7 @@ TextModelConvert.createFromString = function (text) {
         }
         model.insert(text[i]);
     }
+    model.at(0, 0);
     return model;
 };
 
