@@ -123,6 +123,8 @@ var text7 = new TextModel();
 var screen7 = new ScreenModel(2, 2, text7.atLine(), 0);
 screen7.insert('＠');
 // ＠
+assert.equal(screen7.getCursorLine(), 0);
+assert.equal(screen7.getCursorRow(), 1);
 assert.equal(screen7.getNextLine(), null);
 assert.equal(screen7.getNextLinePosition(), 0);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
@@ -132,6 +134,8 @@ assert.equal(TextModelConvert.createString(text7), '＠');
 
 screen7.insert('「');
 // ＠「
+assert.equal(screen7.getCursorLine(), 0);
+assert.equal(screen7.getCursorRow(), 2);
 assert.equal(screen7.getNextLine(), null);
 assert.equal(screen7.getNextLinePosition(), 0);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
@@ -142,6 +146,8 @@ assert.equal(TextModelConvert.createString(text7), '＠「');
 
 screen7.insert('、');
 // ＠「、
+assert.equal(screen7.getCursorLine(), 0);
+assert.equal(screen7.getCursorRow(), 3);
 assert.equal(screen7.getNextLine(), null);
 assert.equal(screen7.getNextLinePosition(), 0);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
@@ -154,6 +160,9 @@ screen7.insert('」');
 // ＠
 // 「、
 // 」
+// TODO: Enable following two checks.
+// assert.equal(screen7.getCursorLine(), 2);
+// assert.equal(screen7.getCursorRow(), 1);
 assert.equal(screen7.getNextLine(), text7.atLine(0));
 assert.equal(screen7.getNextLinePosition(), 3);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');

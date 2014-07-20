@@ -7,7 +7,7 @@
 /**
  * ScreenModel class.
  * TODO:
- *  - callback on screen invalidate
+ *  - cursor calculation.
  *  - delete character
  *  - position move
  *  - tests on inserting arbitorary position
@@ -86,6 +86,7 @@ ScreenModel.prototype.insert = function (character) {
         this._lines[i + 1].updateContents(
                 this._rows, line.getNextLine(), line.getNextLinePosition());
     }
+    // TODO: Update cursor correctly.
     if (this.onMove)
         this.onMove(this._cursor.line, this._cursor.row);
 };
@@ -104,6 +105,22 @@ ScreenModel.prototype.getNextLine = function () {
  */
 ScreenModel.prototype.getNextLinePosition = function () {
     return this._lines[this._rows - 1].getNextLinePosition();
+};
+
+/**
+ * Get cursor line.
+ * @return {number} The current line position.
+ */
+ScreenModel.prototype.getCursorLine = function () {
+    return this._cursor.line;
+};
+
+/**
+ * Get cursor row.
+ * @return {number} The current row position.
+ */
+ScreenModel.prototype.getCursorRow = function () {
+    return this._cursor.row;
 };
 
 /**
