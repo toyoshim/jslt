@@ -139,3 +139,22 @@ assert.equal(text.getRowLength(), 0);
 assert.equal(text.getRowPosition(), -1);
 assert.throws(function(){text.at()}, RangeError)
 console.log('[PASS] TextModel line break test');
+
+text.breakLine();
+assert.equal(text.getLinePosition(), 2);
+assert.equal(text.getLineLength(), 3);
+text.insert('C');
+text.atLine(1);
+assert.equal(text.getLinePosition(), 1);
+assert.equal(text.getRowLength(), 0);
+assert.equal(text.getRowPosition(), -1);
+text.remove();
+assert.equal(text.getLinePosition(), 0);
+assert.equal(text.getLineLength(), 2);
+text.atLine(0);
+assert.equal(text.getRowLength(), 1);
+assert.equal(text.at(), 'A');
+text.atLine(1);
+assert.equal(text.getRowLength(), 1);
+assert.equal(text.at(), 'C');
+console.log('[PASS] TextModel remove test');

@@ -84,8 +84,22 @@ TextModel.prototype.at = function (n, m) {
     return this._lines.at(n).at(m).character;
 };
 
+/**
+ * Insert a unicode character onto the current position.
+ * @param character {string} A unicode text.
+ */
 TextModel.prototype.insert = function (character) {
     this.atLine().insert(new TextModel.Cell(character));
+};
+
+/**
+ * Remove a unicodecharacter from the current position.
+ */
+TextModel.prototype.remove = function () {
+    if (0 != this.getRowLength())
+        this._lines.at().remove();
+    else
+        this._lines.remove();
 };
 
 /**
