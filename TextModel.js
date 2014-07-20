@@ -10,6 +10,8 @@
  */
 function TextModel () {
     this._lines = new TextModel.List();
+    this._lines.insert(new TextModel.List());
+
 }
 exports.TextModel = TextModel;
 
@@ -83,8 +85,6 @@ TextModel.prototype.at = function (n, m) {
 };
 
 TextModel.prototype.insert = function (character) {
-    if (0 == this.getLineLength())
-        this._lines.insert(new TextModel.List());
     this.atLine().insert(new TextModel.Cell(character));
 };
 
@@ -92,8 +92,6 @@ TextModel.prototype.insert = function (character) {
  * Insert a line break, and set the current position to the next line.
  */
 TextModel.prototype.breakLine = function () {
-    if (0 == this.getLineLength())
-        this._lines.insert(new TextModel.List());
     this._lines.insert(new TextModel.List());
 };
 
@@ -134,6 +132,23 @@ TextModel.Cell.prototype.insertPrevious = function (item) {
     item.previous = oldItem;
     if (oldItem)
         oldItem.next = item;
+};
+
+/**
+ * Get the next Cell item.
+ * @return {Object} TextModelCell object at the next place.
+ */
+TextModel.Cell.prototype.getNext = function () {
+    return this.next;
+};
+
+/**
+ * Get the previous Cell item.
+ * @return {Object} TextModelCell object at the previous place.
+ */
+
+TextModel.Cell.prototype.getPrevious = function () {
+    return this.previous;
 };
 
 /**

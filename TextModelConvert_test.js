@@ -68,3 +68,6 @@ var u8dst = Uint8Array(dst);
 for (var i = 0; i < src.byteLength; ++i)
     assert.equal(u8dst[i], u8src[i]);
 console.log('[PASS] convert ArrayBuffer in UTF-8');
+
+assert.equal(TextModelConvert.createString(new TextModel()), '');
+console.log('[PASS] convert empty model')

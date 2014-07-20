@@ -84,14 +84,17 @@ assert.equal(list.at().character, '3');
 assert.throws(function(){list.at(3)}, RangeError);
 console.log('[PASS] List insert the third item');
 
+assert.equal(list.at(0).getNext().character, list.at(1).character);
+assert.equal(list.at(1).getPrevious(), list.at(0));
+console.log('[PASS] List get the next and the previous item');
+
 var text = new TextModel();
-assert.equal(text.getLineLength(), 0);
-assert.equal(text.getLinePosition(), -1);
-assert.throws(function(){text.getRowLength()}, RangeError);
-assert.throws(function(){text.getRowPosition()}, RangeError);
-assert.throws(function(){text.atLine()}, RangeError)
-assert.throws(function(){text.atRow()}, RangeError)
-assert.throws(function(){text.at()}, RangeError)
+assert.equal(text.getLineLength(), 1);
+assert.equal(text.getLinePosition(), 0);
+assert.equal(text.getRowLength(), 0);
+assert.equal(text.getRowPosition(), -1);
+assert.throws(function(){text.atLine(1)}, RangeError)
+assert.throws(function(){text.atRow(1)}, RangeError)
 console.log('[PASS] TextModel constructor test');
 
 text.insert('A');
