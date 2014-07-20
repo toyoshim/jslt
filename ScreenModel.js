@@ -45,7 +45,9 @@ function ScreenModel (lines, rows, line, position) {
     this.onMove = null;
     this.onUpdateLine = null;
 }
-exports.ScreenModel = ScreenModel;
+try {
+    exports.ScreenModel = ScreenModel;
+} catch (e) {}
 
 /**
  * Get the character at the position..

@@ -19,7 +19,9 @@ function ArrayBuffer (length) {
         value: new Array(length)
     });
 }
-exports.ArrayBuffer = ArrayBuffer;
+try {
+    exports.ArrayBuffer = ArrayBuffer;
+} catch (e) {}
 
 /**
  * Returns a new ArrayBuffer whose contents are a copy of this ArrayBuffer's

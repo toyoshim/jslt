@@ -44,7 +44,9 @@ function DNS (server) {
         });
     });
 }
-exports.DNS = DNS;
+try {
+    exports.DNS = DNS;
+} catch (e) {}
 
 /**
  * @type {number} Constant variables.

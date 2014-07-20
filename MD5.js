@@ -19,8 +19,11 @@ function MD5 () {
     this._c = 0;  // @type {number}
     this._d = 0;  // @type {number}
 }
-exports.MD5 = MD5;
-/**
+try {
+    exports.MD5 = MD5;
+} catch (e) {}
+
+**
  * @type {number} Constant variables to calculate MD5.
  * @const
  * @private

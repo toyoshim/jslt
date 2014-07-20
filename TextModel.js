@@ -13,7 +13,9 @@ function TextModel () {
     this._lines.insert(new TextModel.List());
 
 }
-exports.TextModel = TextModel;
+try {
+    exports.TextModel = TextModel;
+} catch (e) {}
 
 /**
  * Get a line length.

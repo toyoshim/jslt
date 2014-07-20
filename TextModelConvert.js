@@ -9,7 +9,9 @@
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  */
 TextModelConvert = {};
-exports.TextModelConvert= TextModelConvert;
+try {
+    exports.TextModelConvert= TextModelConvert;
+} catch (e) {}
 
 /**
  * Create TextModel from JavaScript string in UTF-16.

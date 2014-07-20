@@ -9,7 +9,9 @@
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  */
 Unicode = {};
-exports.Unicode = Unicode;
+try {
+    exports.Unicode = Unicode;
+} catch (e) {}
 
 /**
  * Check if the specified code is BMP.
