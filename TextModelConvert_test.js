@@ -36,8 +36,8 @@ var model3 = TextModelConvert.createFromString(hello);
 var checkHello = function (model) {
     assert.ok(model);
     assert.equal(model.getLineLength(), 3);
-    assert.equal(model.getRowLength(), 2);  // 世界
-    assert.equal(model.at(), '界');
+    assert.equal(model.getRowLength(), 5);  // こんにちは
+    assert.equal(model.at(), 'こ');
     model.atLine(0);
     assert.equal(model.getRowLength(), 5);  // こんにちは
     model.atLine(1);
