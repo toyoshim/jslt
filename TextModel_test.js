@@ -89,6 +89,25 @@ assert.equal(list.at(0).getNext().character, list.at(1).character);
 assert.equal(list.at(1).getPrevious(), list.at(0));
 console.log('[PASS] List get the next and the previous item');
 
+// 1 <-> 2 <-> 3
+list.at(1);
+list.remove();
+assert.equal(list.getLength(), 2);
+assert.equal(list.getPosition(), 0);
+assert.equal(list.at(0).character, '1');
+assert.equal(list.at(1).character, '3');
+assert.throws(function(){list.at(2)}, RangeError);
+assert.equal(list.getPosition(), 1);
+list.remove();
+assert.equal(list.getLength(), 1);
+assert.equal(list.getPosition(), 0);
+list.remove();
+assert.equal(list.getLength(), 0);
+assert.equal(list.getPosition(), -1);
+assert.throws(function(){list.remove()}, RangeError);
+console.log('[PASS] List remove a center item');
+
+
 var text = new TextModel();
 assert.equal(text.getLineLength(), 1);
 assert.equal(text.getLinePosition(), 0);
