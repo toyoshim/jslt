@@ -117,3 +117,49 @@ assert.equal(screen6.getCharacterAt(1, 2), ''); // Can access for Kinsoku.
 assert.throws(function(){screen6.getCharacterAt(1,3)}, RangeError);
 assert.throws(function(){screen6.getCharacterAt(2,0)}, RangeError);
 console.log('[PASS] line end wrap test');
+
+// ＠「、」
+var text7 = new TextModel();
+var screen7 = new ScreenModel(2, 2, text7.atLine(), 0);
+screen7.insert('＠');
+// ＠
+assert.equal(screen7.getNextLine(), null);
+assert.equal(screen7.getNextLinePosition(), 0);
+assert.equal(screen7.getCharacterAt(0, 0), '＠');
+assert.equal(screen7.getCharacterAt(0, 1), '');
+assert.equal(screen7.getCharacterAt(1, 0), '');
+assert.equal(TextModelConvert.createString(text7), '＠');
+
+screen7.insert('「');
+// ＠「
+assert.equal(screen7.getNextLine(), null);
+assert.equal(screen7.getNextLinePosition(), 0);
+assert.equal(screen7.getCharacterAt(0, 0), '＠');
+assert.equal(screen7.getCharacterAt(0, 1), '「');
+assert.equal(screen7.getCharacterAt(0, 2), '');
+assert.equal(screen7.getCharacterAt(1, 0), '');
+assert.equal(TextModelConvert.createString(text7), '＠「');
+
+screen7.insert('、');
+// ＠「、
+assert.equal(screen7.getNextLine(), null);
+assert.equal(screen7.getNextLinePosition(), 0);
+assert.equal(screen7.getCharacterAt(0, 0), '＠');
+assert.equal(screen7.getCharacterAt(0, 1), '「');
+assert.equal(screen7.getCharacterAt(0, 2), '、');
+assert.equal(screen7.getCharacterAt(1, 0), '');
+assert.equal(TextModelConvert.createString(text7), '＠「、');
+
+screen7.insert('」');
+// ＠
+// 「、
+// 」
+assert.equal(screen7.getNextLine(), text7.atLine(0));
+assert.equal(screen7.getNextLinePosition(), 3);
+assert.equal(screen7.getCharacterAt(0, 0), '＠');
+assert.equal(screen7.getCharacterAt(0, 1), '');
+assert.equal(screen7.getCharacterAt(1, 0), '「');
+assert.equal(screen7.getCharacterAt(1, 1), '、');
+assert.equal(screen7.getCharacterAt(1, 2), '');
+assert.equal(TextModelConvert.createString(text7), '＠「、」');
+console.log('[PASS] insert editing');

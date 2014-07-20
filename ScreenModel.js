@@ -6,6 +6,12 @@
  */
 /**
  * ScreenModel class.
+ * TODO:
+ *  - callback on screen invalidate
+ *  - delete character
+ *  - position move
+ *  - tests on inserting arbitorary position
+ *  - page break
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  * @param lines {number} Screen width in line.
  * @param rows {number} Screen height in rows.
@@ -30,7 +36,7 @@ function ScreenModel (lines, rows, line, position) {
     };
     for (var i = 0; i < lines; ++i) {
         this._lines[i] = new ScreenModel.Line(rows, line, position);
-        this._lines[i].adoptWrapRules(this._wrapRules);
+        this._lines[i].adoptWrapRules(rows, this._wrapRules);
         line = this._lines[i].getNextLine();
         position = this._lines[i].getNextLinePosition();
     }
@@ -48,6 +54,34 @@ ScreenModel.prototype.getCharacterAt = function (line, row) {
     if (this._lines.length <= line || this._rows < row)
         throw new RangeError('getCharacterAt');
     return this._lines[line].getCharacterAt(row);
+};
+
+/**
+ * Insert a character to the current potision.
+ * @param character {string} A Unicode character in UTF-16.
+ */
+ScreenModel.prototype.insert = function (character) {
+    var inserted = false;
+    var length = this._lines.length;
+    for (var i = this._cursor.line; i < length; ++i) {
+        var line = this._lines[i];
+        var nextLine = line.getNextLine();
+        var nextPosition = line.getNextLinePosition();
+        if (!inserted) {
+            inserted = true;
+            line.insertCharacterAt(this._cursor.row++, character);
+        }
+        line.adoptWrapRules(this._rows, this._wrapRules);
+        if (nextLine == line.getNextLine() ||
+                nextPosition == line.getNextLinePosition())
+            break;
+        if (i + 1 == length) {
+            // TODO: Page break.
+            break;
+        }
+        this._lines[i + 1].updateContents(
+                this._rows, line.getNextLine(), line.getNextLinePosition());
+    }
 };
 
 /**
@@ -74,9 +108,17 @@ ScreenModel.prototype.getNextLinePosition = function () {
  * @constructor
  */
 ScreenModel.Line = function (rows, line, position) {
+    this.updateContents(rows, line, position);
+};
+
+
+/**
+ * Update contents.
+ */
+ScreenModel.Line.prototype.updateContents = function (rows, line, position) {
+    this._rows = rows;
     this._line = line;
     this._position = position;
-    this._rows = rows;
     if (line == null) {
         this._nextLine = line;
         this._nextPosition = 0;
@@ -92,13 +134,20 @@ ScreenModel.Line = function (rows, line, position) {
     }
 };
 
-ScreenModel.Line.prototype.adoptWrapRules = function (rules) {
+/**
+ * Adopt wrap rules.
+ * @param rows {number} Default rows in line.
+ * @param rules {Object} Wrap rules.
+ */
+ScreenModel.Line.prototype.adoptWrapRules = function (rows, rules) {
+    this._rows = rows;
     var line = this._line;
     if (line == null || this._nextLine != line)
         return;
+
     var position = this._position;
     var length = line.getLength() - position;
-    var next = line.at(this._nextPosition);
+    var next = line.at(position + this._rows);
     var nextNext = next.getNext();
     // Dangline rule check.
     if ((nextNext == null || rules.lineStart.indexOf(nextNext.character) < 0) &&
@@ -112,7 +161,7 @@ ScreenModel.Line.prototype.adoptWrapRules = function (rules) {
         }
         return;
     }
-    for (var rows = this._rows; rows > 0; --rows) {
+    for (; rows > 0; --rows) {
         // Line start rule check.
         if (rules.lineStart.indexOf(line.at(position + rows).character) >= 0)
             continue;
@@ -151,4 +200,17 @@ ScreenModel.Line.prototype.getCharacterAt = function (row) {
             this._line.getLength() <= position)
         return '';
     return this._line.at(position).character;
+};
+
+/**
+ * Insert a character at the position in a line.
+ * @param row {number} Row position in a line.
+ * @param character {string} A Unicode text in UTF-16 to insert.
+ */
+ScreenModel.Line.prototype.insertCharacterAt = function (row, character) {
+    var position = this._position + row;
+    if (this._line.getPosition() != position - 1)
+        this._line.at(position);
+    this._line.insert(new TextModel.Cell(character));
+    this.updateContents(this._rows, this._line, this._position);
 };
