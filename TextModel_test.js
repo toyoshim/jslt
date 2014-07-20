@@ -22,25 +22,26 @@ assert.equal(cell[0].next, undefined);
 console.log('[PASS] Cell constructor test');
 
 cell[1] = new TextModel.Cell('b');
-cell[0].insertNext(cell[1]);
+cell[0].insertCell(cell[1]);
 assert.equal(cell[0].next, cell[1]);
 assert.equal(cell[1].previous, cell[0]);
 console.log('[PASS] Cell set next test');
 
-cell[2] = new TextModel.Cell('x');
-cell[0].insertPrevious(cell[2]);
-assert.equal(cell[0].previous, cell[2]);
-assert.equal(cell[2].next, cell[0]);
-console.log('[PASS] Cell set previous test');
+// [0](a) <-> {[2](0)} <-> [1](b)
+cell[2] = new TextModel.Cell('0');
+cell[0].insertCell(cell[2]);
+assert.equal(cell[0].next, cell[2]);
+assert.equal(cell[2].next, cell[1]);
+assert.equal(cell[1].previous, cell[2]);
+assert.equal(cell[2].previous, cell[0]);
+console.log('[PASS] Cell insert test');
 
-// [2](x) <-> [0](a) <-> [1](b)
-cell[3] = new TextModel.Cell('0');
-cell[0].insertNext(cell[3]);
-assert.equal(cell[0].next, cell[3]);
-assert.equal(cell[3].next, cell[1]);
-assert.equal(cell[1].previous, cell[3]);
-assert.equal(cell[3].previous, cell[0]);
-console.log('[PASS] Cell insert next test');
+assert.equal(cell[2].removeCell(), cell[0]);
+assert.equal(cell[0].next, cell[1]);
+assert.equal(cell[2].next, null);
+assert.equal(cell[1].previous, cell[0]);
+assert.equal(cell[2].previous, null);
+console.log('[PASS] Cell remove test');
 
 var list = new TextModel.List();
 assert.equal(list.getLength(), 0);

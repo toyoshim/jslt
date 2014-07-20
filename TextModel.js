@@ -112,7 +112,7 @@ TextModel.Cell = function (character, previous, next) {
  * Insert a next item, and chain them.
  * @param item {Object} TextModel.Cell object to insert.
  */
-TextModel.Cell.prototype.insertNext = function (item) {
+TextModel.Cell.prototype.insertCell = function (item) {
     var oldItem = this.next;
     this.next = item;
     item.previous = this;
@@ -122,16 +122,18 @@ TextModel.Cell.prototype.insertNext = function (item) {
 };
 
 /**
- * Insert a previous item, and chain them.
- * @param item {Object} TextModel.Cell object to insert.
+ * Remove this item, and chain previous and next.
+ * @return {Object} TextModel.Cell a previous item.
  */
-TextModel.Cell.prototype.insertPrevious = function (item) {
-    var oldItem = this.previous;
-    this.previous = item;
-    item.next = this;
-    item.previous = oldItem;
-    if (oldItem)
-        oldItem.next = item;
+TextModel.Cell.prototype.removeCell = function () {
+    if (this.previous)
+        this.previous.next = this.next;
+    if (this.next)
+        this.next.previous = this.previous;
+    var result = this.previous;
+    this.previous = null;
+    this.next = null;
+    return result;
 };
 
 /**
@@ -214,8 +216,21 @@ TextModel.List.prototype.insert = function (item) {
     if (this._length == 0)
         this._first = item;
     else
-        this._current.insertNext(item);
-    this._position++;
+        this._current.insertCell(item);
+    ++this._position;
     this._current = item;
-    this._length++;
+    ++this._length;
+};
+
+/**
+ * Delete an item from the current position.
+ */
+TextModel.List.prototype.remove = function (item) {
+    if (this._length == 0)
+        throw new RangeError('remove')
+    if (0 == this._position)
+        this._first = this._current.next;
+    this._current = this._current.removeCell();
+    --this._position;
+    --this._length;
 };
