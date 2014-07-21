@@ -23,7 +23,7 @@ try {
     exports.MD5 = MD5;
 } catch (e) {}
 
-**
+/**
  * @type {number} Constant variables to calculate MD5.
  * @const
  * @private
