@@ -7,17 +7,16 @@
 /**
  * ScreenModel class.
  * TODO:
- *  - position move
- *  - line break
- *  - page break
+ *  - page handling
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  * @param lines {number} Screen width in line.
  * @param rows {number} Screen height in rows.
- * @param line {object} TextModel.List object that contains contents.
+ * @param text {object} TextModel object that contains contents.
  * @param position {number} The first character position in |line|.
  * @constructor
  */
-function ScreenModel (lines, rows, line, position) {
+function ScreenModel (lines, rows, text, position) {
+    this._text = text;
     this._lines = new Array(lines);
     this._wrapRules = {
         dangling: '、。',
@@ -32,6 +31,7 @@ function ScreenModel (lines, rows, line, position) {
                 '。.',
         group: ''  // TODO
     };
+    var line = text.atLine(0);
     for (var i = 0; i < lines; ++i) {
         this._lines[i] = new ScreenModel.Line(
                 rows, line, position, this._wrapRules);
@@ -63,8 +63,14 @@ ScreenModel.prototype.getCharacterAt = function (line, row) {
  * @param character {string} A Unicode character in UTF-16.
  */
 ScreenModel.prototype.insert = function (character) {
-    this._lines[this._cursor.line].insertCharacterAt(
-            this._cursor.row, character);
+    var code = character.charCodeAt(0);
+    if (code == 0x0d || code == 0x0a) {
+        this._lines[this._cursor.line].getCharacterAt(this._cursor.row);
+        this._text.breakLine();
+    } else {
+        this._lines[this._cursor.line].insertCharacterAt(
+                this._cursor.row, character);
+    }
     this.updateLayout();
     this.moveForward();
 };
@@ -74,8 +80,8 @@ ScreenModel.prototype.insert = function (character) {
  */
 ScreenModel.prototype.remove = function () {
     var line = this._lines[this._cursor.line];
-    line.removeAt(this._cursor.row);
-    this.updateLayout();
+    if (line.removeAt(this._cursor.row))
+        this.updateLayout();
 }
 
 /**
@@ -171,7 +177,9 @@ ScreenModel.prototype.moveForward = function () {
     var nextLine = this._lines[line].getNextLine();
     var wrapping = this._lines[line].getCharacterAt(row + 1) == '' &&
             nextLine == this._lines[line].getCurrentLine();
-    if (dangling || fullfilled || wrapping) {
+    var lf = this._lines[line].getCharacterAt(row + 1) == '' &&
+            nextLine != null && nextLine != this._lines[line].getCurrentLine();
+    if (dangling || fullfilled || wrapping || lf) {
         // Go to the next line home if possible.
         if (nextLine == null)
             return false;
@@ -189,11 +197,16 @@ ScreenModel.prototype.moveForward = function () {
  */
 ScreenModel.prototype.moveBackward = function () {
     if (this._cursor.row == 0) {
-        // Go to the previous line home if possible.
-        if (this._lines[this._cursor.line].previous == null)
+        if (this._cursor.line == 0)
             return false;
-        // TODO: Page handling.
-        this.setCursor(this._cursor.line - 1, 0);
+        var line = this._lines[this._cursor.line - 1];
+        for (var row = 0; row <= this._rows; ++row) {
+            if (line.getCharacterAt(row) == '')
+                break;
+        }
+        if (row != 0 && line.getCurrentLine() == line.getNextLine())
+            row--;
+        this.setCursor(this._cursor.line - 1, row);
         return true;
     }
     this.setCursor(this._cursor.line, this._cursor.row - 1);
@@ -334,11 +347,15 @@ ScreenModel.Line.prototype.insertCharacterAt = function (row, character) {
 /**
  * Remove a character at the position in a line.
  * @param row {number} Row position in a line.
+ * @return {boolean} True if succeeded.
  */
 ScreenModel.Line.prototype.removeAt = function (row) {
     var position = this._position + row;
+    if (position >= this._line.getLength())
+        return false;
     this._line.at(position);
     this._line.remove();
+    return true;
 };
 
 /**
