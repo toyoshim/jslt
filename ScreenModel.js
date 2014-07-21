@@ -183,7 +183,7 @@ ScreenModel.prototype.moveForward = function () {
     var line = this._cursor.line;
     if (row == this._rows || this._lines[line].getCharacterAt(row + 1) == '') {
         // Go to the next line home if possible.
-        if (this._lines[line].next == null)
+        if (this._lines[line].getNextLine() == null)
             return false;
         // TODO: Page handling.
         this.setCursor(this._cursor.line + 1, 0);
