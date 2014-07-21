@@ -143,6 +143,7 @@ assert.throws(function(){text.atLine(1)}, RangeError)
 assert.throws(function(){text.atRow(1)}, RangeError)
 console.log('[PASS] TextModel constructor test');
 
+// A
 text.insert('A');
 assert.equal(text.getLineLength(), 1);
 assert.equal(text.getLinePosition(), 0);
@@ -157,22 +158,30 @@ assert.equal(line.getPosition(), 0);
 assert.equal(line.at().character, 'A');
 console.log('[PASS] TextModel insert test');
 
+// A\n
 text.breakLine();
 assert.equal(text.getLineLength(), 2);
 assert.equal(text.getLinePosition(), 1);
 assert.throws(function(){text.atLine(2)}, RangeError)
 assert.equal(text.getRowLength(), 0);
 assert.equal(text.getRowPosition(), -1);
+assert.equal(text.at(0, 0), 'A');
 console.log('[PASS] TextModel line break test');
 
+text.at(1, -1);
+// A\n\n
 text.breakLine();
 assert.equal(text.getLinePosition(), 2);
 assert.equal(text.getLineLength(), 3);
+// A\n\nC
 text.insert('C');
 text.atLine(1);
 assert.equal(text.getLinePosition(), 1);
 assert.equal(text.getRowLength(), 0);
 assert.equal(text.getRowPosition(), -1);
+assert.equal(text.at(2, 0), 'C');
+text.atLine(1);
+// A\nC
 text.remove();
 assert.equal(text.getLinePosition(), 0);
 assert.equal(text.getLineLength(), 2);
@@ -183,3 +192,14 @@ text.atLine(1);
 assert.equal(text.getRowLength(), 1);
 assert.equal(text.at(), 'C');
 console.log('[PASS] TextModel remove test');
+
+text.at(0, -1);
+assert.equal(text.getLinePosition(), 0);
+assert.equal(text.getLineLength(), 2);
+assert.equal(text.getRowLength(), 1);
+// \nA\nC
+text.breakLine();
+assert.equal(text.getLinePosition(), 1);
+assert.equal(text.getLineLength(), 3);
+assert.equal(text.getRowLength(), 0);
+console.log('[PASS] TextModel insert at the first place test');

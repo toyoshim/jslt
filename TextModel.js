@@ -83,7 +83,10 @@ TextModel.prototype.atRow = function (n) {
  * @return {string} one Unicode character at position.
  */
 TextModel.prototype.at = function (n, m) {
-    return this._lines.at(n).at(m).character;
+    var cell = this._lines.at(n).at(m);
+    if (cell != null)
+        return cell.character;
+    return '';
 };
 
 /**
