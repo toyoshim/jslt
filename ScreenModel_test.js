@@ -88,8 +88,8 @@ console.log('[PASS] dangling wrap test');
 // ひょ
 var text5 = new TextModelConvert.createFromString('うひょ');
 var screen5 = new ScreenModel(2, 2, text5.atLine(), 0);
-assert.equal(screen5.getNextLine(), null);
-assert.equal(screen5.getNextLinePosition(), 0);
+assert.equal(screen5.getNextLine(), text5.atLine());
+assert.equal(screen5.getNextLinePosition(), 3);
 assert.equal(screen5.getCharacterAt(0, 0), 'う');
 assert.equal(screen5.getCharacterAt(0, 1), '');
 assert.equal(screen5.getCharacterAt(0, 2), '');
@@ -104,9 +104,9 @@ console.log('[PASS] line start wrap test');
 // ※
 // 「あ
 var text6 = new TextModelConvert.createFromString('※「あ');
-var screen6 = new ScreenModel(2, 2, text6.atLine(), 0);
-assert.equal(screen6.getNextLine(), null);
-assert.equal(screen6.getNextLinePosition(), 0);
+var screen6 = new ScreenModel(3, 2, text6.atLine(), 0);
+assert.equal(screen6.getNextLine(), text6.atLine());
+assert.equal(screen6.getNextLinePosition(), 3);
 assert.equal(screen6.getCharacterAt(0, 0), '※');
 assert.equal(screen6.getCharacterAt(0, 1), '');
 assert.equal(screen6.getCharacterAt(0, 2), '');
@@ -114,13 +114,34 @@ assert.throws(function(){screen6.getCharacterAt(0,3)}, RangeError);
 assert.equal(screen6.getCharacterAt(1, 0), '「');
 assert.equal(screen6.getCharacterAt(1, 1), 'あ');
 assert.equal(screen6.getCharacterAt(1, 2), ''); // Can access for Kinsoku.
+assert.equal(screen6.getCharacterAt(2, 0), '');
+assert.equal(screen6.getCharacterAt(2, 1), '');
+assert.equal(screen6.getCharacterAt(2, 2), '');
+assert.equal(screen6.getCharacterAt(2, 2), ''); // Can access for Kinsoku.
 assert.throws(function(){screen6.getCharacterAt(1,3)}, RangeError);
-assert.throws(function(){screen6.getCharacterAt(2,0)}, RangeError);
+assert.throws(function(){screen6.getCharacterAt(3,0)}, RangeError);
 console.log('[PASS] line end wrap test');
+
+assert.equal(screen6.getCursorLine(), 0);
+assert.equal(screen6.getCursorRow(), 0);
+screen6.setCursor(2, 0);
+assert.equal(screen6.getCursorLine(), 2);
+assert.equal(screen6.getCursorRow(), 0);
+// ※
+// 「あ
+// い
+screen6.insert('い');
+assert.equal(screen6.getCharacterAt(0, 0), '※');
+assert.equal(screen6.getCharacterAt(1, 0), '「');
+assert.equal(screen6.getCharacterAt(1, 1), 'あ');
+assert.equal(screen6.getCharacterAt(2, 0), 'い');
+assert.equal(screen6.getCursorLine(), 2);
+assert.equal(screen6.getCursorRow(), 1);
+console.log('[PASS] simple cursor test');
 
 // ＠「、」
 var text7 = new TextModel();
-var screen7 = new ScreenModel(2, 2, text7.atLine(), 0);
+var screen7 = new ScreenModel(3, 2, text7.atLine(), 0);
 screen7.insert('＠');
 // ＠
 assert.equal(screen7.getCursorLine(), 0);
@@ -133,21 +154,22 @@ assert.equal(screen7.getCharacterAt(1, 0), '');
 assert.equal(TextModelConvert.createString(text7), '＠');
 
 screen7.insert('「');
-// ＠「
-assert.equal(screen7.getCursorLine(), 0);
-assert.equal(screen7.getCursorRow(), 2);
+// ＠
+// 「
+assert.equal(screen7.getCursorLine(), 1);
+assert.equal(screen7.getCursorRow(), 1);
 assert.equal(screen7.getNextLine(), null);
 assert.equal(screen7.getNextLinePosition(), 0);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
-assert.equal(screen7.getCharacterAt(0, 1), '「');
-assert.equal(screen7.getCharacterAt(0, 2), '');
-assert.equal(screen7.getCharacterAt(1, 0), '');
+assert.equal(screen7.getCharacterAt(0, 1), '');
+assert.equal(screen7.getCharacterAt(1, 0), '「');
+assert.equal(screen7.getCharacterAt(1, 1), '');
 assert.equal(TextModelConvert.createString(text7), '＠「');
 
 screen7.insert('、');
 // ＠「、
-assert.equal(screen7.getCursorLine(), 0);
-assert.equal(screen7.getCursorRow(), 3);
+assert.equal(screen7.getCursorLine(), 0);  // TODO: 1 is better expectation
+assert.equal(screen7.getCursorRow(), 3);  // TODO: 0 is better expectation
 assert.equal(screen7.getNextLine(), null);
 assert.equal(screen7.getNextLinePosition(), 0);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
@@ -159,11 +181,9 @@ assert.equal(TextModelConvert.createString(text7), '＠「、');
 screen7.insert('」');
 // ＠
 // 「、
-// ----
 // 」
-// TODO: Enable following two checks.
-// assert.equal(screen7.getCursorLine(), 2);
-// assert.equal(screen7.getCursorRow(), 1);
+assert.equal(screen7.getCursorLine(), 2);
+assert.equal(screen7.getCursorRow(), 1);
 assert.equal(screen7.getNextLine(), text7.atLine(0));
 assert.equal(screen7.getNextLinePosition(), 3);
 assert.equal(screen7.getCharacterAt(0, 0), '＠');
@@ -174,15 +194,15 @@ assert.equal(screen7.getCharacterAt(1, 2), '');
 assert.equal(TextModelConvert.createString(text7), '＠「、」');
 console.log('[PASS] insert editing');
 
-// １| -> １３| -> １２|３ -> １２、|3
+// １| -> １３| -> １２|３
 var text8 = new TextModel();
 var screen8 = new ScreenModel(2, 2, text8.atLine(), 0);
 screen8.insert('１');
 screen8.insert('３');
 screen8.setCursor(0, 1);
 screen8.insert('２');
-assert.equal(screen8.getCursorLine(), 0);
-assert.equal(screen8.getCursorRow(), 2);
+assert.equal(screen8.getCursorLine(), 1);
+assert.equal(screen8.getCursorRow(), 0);
 assert.equal(screen8.getNextLine(), null);
 assert.equal(screen8.getNextLinePosition(), 0);
 assert.equal(screen8.getCharacterAt(0, 0), '１');
@@ -192,10 +212,10 @@ assert.equal(screen8.getCharacterAt(1, 0), '３');
 assert.equal(screen8.getCharacterAt(1, 1), '');
 assert.equal(TextModelConvert.createString(text8), '１２３');
 
+// １２|３ -> １２、|3
 screen8.insert('、');
-// TODO: Enable following two checks.
-// assert.equal(screen8.getCursorLine(), 1);
-// assert.equal(screen8.getCursorRow(), 0);
+assert.equal(screen8.getCursorLine(), 1);
+assert.equal(screen8.getCursorRow(), 0);
 assert.equal(screen8.getNextLine(), null);
 assert.equal(screen8.getNextLinePosition(), 0);
 assert.equal(screen8.getCharacterAt(0, 0), '１');
@@ -206,6 +226,7 @@ assert.equal(screen8.getCharacterAt(1, 1), '');
 assert.equal(TextModelConvert.createString(text8), '１２、３');
 console.log('[PASS] move and insert editing');
 
+// １２、|3 -> １|２、3 -> １|、3
 screen8.setCursor(0, 1);
 screen8.remove();
 assert.equal(screen8.getCursorLine(), 0);
@@ -219,10 +240,11 @@ assert.equal(screen8.getCharacterAt(1, 0), '３');
 assert.equal(screen8.getCharacterAt(1, 1), '');
 assert.equal(TextModelConvert.createString(text8), '１、３');
 
+// １|、3 -> １、|3 -> １、|
 screen8.setCursor(1, 0);
 screen8.remove();
-//assert.equal(screen8.getCursorLine(), 0);
-//assert.equal(screen8.getCursorRow(), 1);
+assert.equal(screen8.getCursorLine(), 1);
+assert.equal(screen8.getCursorRow(), 0);
 assert.equal(screen8.getNextLine(), null);
 assert.equal(screen8.getNextLinePosition(), 0);
 assert.equal(screen8.getCharacterAt(0, 0), '１');

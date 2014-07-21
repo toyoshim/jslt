@@ -64,30 +64,40 @@ ScreenModel.prototype.getCharacterAt = function (line, row) {
  * @param character {string} A Unicode character in UTF-16.
  */
 ScreenModel.prototype.insert = function (character) {
-    var inserted = false;
+    var line = this._lines[this._cursor.line];
+    line.insertCharacterAt(this._cursor.row++, character);
+    var cursorLine = line.getCurrentLine();
+    var cursorRawPosition = line.getCurrentLinePosition() + this._cursor.row;
+
+    // TODO: Reduce unnesessary updates on unmodified lines.
     var length = this._lines.length;
-    for (var i = this._cursor.line; i < length; ++i) {
-        var line = this._lines[i];
-        var nextLine = line.getNextLine();
-        var nextPosition = line.getNextLinePosition();
-        if (!inserted) {
-            inserted = true;
-            line.insertCharacterAt(this._cursor.row++, character);
-        }
+    var i = this._cursor.line - 1;
+    if (i < 0)
+        i = 0;
+    for (; i < length; ++i) {
+        line = this._lines[i];
         line.adoptWrapRules(this._rows, this._wrapRules);
         if (this.onUpdateLine)
             this.onUpdateLine(i);
-        if (nextLine == line.getNextLine() &&
-                nextPosition == line.getNextLinePosition()) {
-            break;
-        }
         if (i + 1 == length) {
             // TODO: Page handling.
+        } else {
+            this._lines[i + 1].updateContents(
+                    this._rows, line.getNextLine(), line.getNextLinePosition());
         }
-        this._lines[i + 1].updateContents(
-                this._rows, line.getNextLine(), line.getNextLinePosition());
+        // Check cursor position.
+        if (line.getCurrentLine() != cursorLine)
+            continue;
+        if (line.getCurrentLinePosition() > cursorRawPosition)
+            continue;
+        if (line.getNextLine == cursorLine &&
+                line.getNextLinePosition() >= cursorRawPosition)
+            continue;
+        this._cursor.line = i;
+        this._cursor.row = cursorRawPosition - line.getCurrentLinePosition();
     }
-    // TODO: Update cursor correctly.
+    // TODO: If cursor locates at the last position, we may want to move it to
+    // the first place in the next line.
     this.setCursor(this._cursor.line, this._cursor.row);
 };
 
@@ -236,7 +246,7 @@ ScreenModel.Line.prototype.updateContents = function (rows, line, position) {
         return;
     }
     var length = line.getLength() - position;
-    if (length > rows) {
+    if (length > rows || (length == rows && line.next == null)) {
         this._nextLine = line;
         this._nextPosition = position + rows;
     } else {
@@ -258,11 +268,14 @@ ScreenModel.Line.prototype.adoptWrapRules = function (rows, rules) {
 
     var position = this._position;
     var length = line.getLength() - position;
-    var next = line.at(position + this._rows);
-    var nextNext = next.getNext();
+    var nextNext = null;
+    if (length > this._rows) {
+        var next = line.at(position + this._rows);
+        nextNext = next.getNext();
+    }
     // Dangline rule check.
     if ((nextNext == null || rules.lineStart.indexOf(nextNext.character) < 0) &&
-            rules.dangling.indexOf(next.character) >= 0) {
+            (next != null && rules.dangling.indexOf(next.character) >= 0)) {
         ++this._rows;
         if (length == this._rows) {
             this._nextLine = line.next;
@@ -272,6 +285,8 @@ ScreenModel.Line.prototype.adoptWrapRules = function (rows, rules) {
         }
         return;
     }
+    if (length <= rows)
+        rows = length - 1;
     for (; rows > 0; --rows) {
         // Line start rule check.
         if (rules.lineStart.indexOf(line.at(position + rows).character) >= 0)
@@ -283,6 +298,23 @@ ScreenModel.Line.prototype.adoptWrapRules = function (rows, rules) {
         break;
     }
     this._nextPosition = position + this._rows;
+};
+
+/**
+ * Get the line object that the current line should start.
+ * @return {object} TextModel.List object that contains contents.
+ */
+ScreenModel.Line.prototype.getCurrentLine = function () {
+    return this._line;
+};
+
+/**
+ * Get the position in the current line object that the current line should
+ * start.
+ * @return {number} The position that the current line starts.
+ */
+ScreenModel.Line.prototype.getCurrentLinePosition = function () {
+    return this._position;
 };
 
 /**

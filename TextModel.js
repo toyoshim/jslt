@@ -230,7 +230,7 @@ TextModel.List.prototype.at = function (n) {
     if (n === undefined)
         n = this._position;
     if (n < -1 || this._length <= n)
-        throw new RangeError('at');
+        throw new RangeError('at ' + n);
     if (n == -1) {
         this._position = -1;
         this._current = null;
