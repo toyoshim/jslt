@@ -125,14 +125,31 @@ TextModel.Cell = function (character, previous, next) {
 };
 
 /**
+ * Insert a previous item, and chain them.
+ * @param item {Object} TextModel.Cell object to insert.
+ */
+TextModel.Cell.prototype.insertPrevious = function (item) {
+    var oldItem = this.previous;
+    this.previous = item;
+    if (item != null) {
+        item.next = this;
+        item.previous = oldItem;
+    }
+    if (oldItem)
+        oldItem.next = item;
+};
+
+/**
  * Insert a next item, and chain them.
  * @param item {Object} TextModel.Cell object to insert.
  */
-TextModel.Cell.prototype.insertCell = function (item) {
+TextModel.Cell.prototype.insertNext = function (item) {
     var oldItem = this.next;
     this.next = item;
-    item.previous = this;
-    item.next = oldItem;
+    if (item != null) {
+        item.previous = this;
+        item.next = oldItem;
+    }
     if (oldItem)
         oldItem.previous = item;
 };
@@ -209,8 +226,13 @@ TextModel.List.prototype.getPosition = function () {
 TextModel.List.prototype.at = function (n) {
     if (n === undefined)
         n = this._position;
-    if (n < 0 || n >= this._length)
+    if (n < -1 || this._length <= n)
         throw new RangeError('at');
+    if (n == -1) {
+        this._position = -1;
+        this._current = null;
+        return null;
+    }
     var i = 0;
     var item = this._first;
     if (n >= this._position) {
@@ -229,10 +251,15 @@ TextModel.List.prototype.at = function (n) {
  * @param item {Object} TextModel.Cell to insert.
  */
 TextModel.List.prototype.insert = function (item) {
-    if (this._length == 0)
+    if (this._length == 0 || this._position == -1) {
+        if (this._first)
+            this._first.insertPrevious(item);
+        else
+            item.insertNext(this._first);
         this._first = item;
-    else
-        this._current.insertCell(item);
+    } else {
+        this._current.insertNext(item);
+    }
     ++this._position;
     this._current = item;
     ++this._length;

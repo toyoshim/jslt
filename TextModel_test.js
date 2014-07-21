@@ -22,32 +22,37 @@ assert.equal(cell[0].next, undefined);
 console.log('[PASS] Cell constructor test');
 
 cell[1] = new TextModel.Cell('b');
-cell[0].insertCell(cell[1]);
+cell[0].insertNext(cell[1]);
 assert.equal(cell[0].next, cell[1]);
 assert.equal(cell[1].previous, cell[0]);
-console.log('[PASS] Cell set next test');
+cell[2] = new TextModel.Cell('z');
+cell[0].insertPrevious(cell[2]);
+assert.equal(cell[2].next, cell[0]);
+assert.equal(cell[0].previous, cell[2]);
+console.log('[PASS] Cell set next / previous test');
 
-// [0](a) <-> {[2](0)} <-> [1](b)
-cell[2] = new TextModel.Cell('0');
-cell[0].insertCell(cell[2]);
-assert.equal(cell[0].next, cell[2]);
-assert.equal(cell[2].next, cell[1]);
-assert.equal(cell[1].previous, cell[2]);
-assert.equal(cell[2].previous, cell[0]);
+// [0](a) <-> {[3](0)} <-> [1](b)
+cell[3] = new TextModel.Cell('0');
+cell[0].insertNext(cell[3]);
+assert.equal(cell[0].next, cell[3]);
+assert.equal(cell[3].next, cell[1]);
+assert.equal(cell[1].previous, cell[3]);
+assert.equal(cell[3].previous, cell[0]);
 console.log('[PASS] Cell insert test');
 
-assert.equal(cell[2].removeCell(), cell[0]);
+assert.equal(cell[3].removeCell(), cell[0]);
 assert.equal(cell[0].next, cell[1]);
-assert.equal(cell[2].next, null);
+assert.equal(cell[3].next, null);
 assert.equal(cell[1].previous, cell[0]);
-assert.equal(cell[2].previous, null);
+assert.equal(cell[3].previous, null);
 console.log('[PASS] Cell remove test');
 
 var list = new TextModel.List();
 assert.equal(list.getLength(), 0);
 assert.equal(list.getPosition(), -1);
 assert.throws(function(){list.at(0)}, RangeError);
-assert.throws(function(){list.at(-1)}, RangeError);
+list.at(-1);
+assert.throws(function(){list.at(-2)}, RangeError);
 console.log('[PASS] List constructor test');
 
 list.insert(new TextModel.Cell('1'));
@@ -107,6 +112,27 @@ assert.equal(list.getPosition(), -1);
 assert.throws(function(){list.remove()}, RangeError);
 console.log('[PASS] List remove a center item');
 
+list.insert(new TextModel.Cell('7'));
+assert.equal(list.getLength(), 1);
+assert.equal(list.getPosition(), 0);
+assert.equal(list.at(0).character, '7');
+assert.throws(function(){list.at(1)}, RangeError);
+list.insert(new TextModel.Cell('3'));
+assert.equal(list.getLength(), 2);
+assert.equal(list.getPosition(), 1);
+assert.equal(list.at(0).character, '7');
+assert.equal(list.at(1).character, '3');
+assert.throws(function(){list.at(2)}, RangeError);
+list.at(-1);
+list.insert(new TextModel.Cell('5'));
+assert.equal(list.getLength(), 3);
+assert.equal(list.getPosition(), 0);
+assert.equal(list.at(0).character, '5');
+assert.equal(list.at(1).character, '7');
+assert.equal(list.at(2).character, '3');
+assert.throws(function(){list.at(3)}, RangeError);
+console.log('[PASS] List append at the first place');
+
 
 var text = new TextModel();
 assert.equal(text.getLineLength(), 1);
@@ -137,7 +163,6 @@ assert.equal(text.getLinePosition(), 1);
 assert.throws(function(){text.atLine(2)}, RangeError)
 assert.equal(text.getRowLength(), 0);
 assert.equal(text.getRowPosition(), -1);
-assert.throws(function(){text.at()}, RangeError)
 console.log('[PASS] TextModel line break test');
 
 text.breakLine();
