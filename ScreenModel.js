@@ -8,7 +8,7 @@
  * ScreenModel class.
  * TODO:
  *  - cursor calculation.
- *  - delete character
+ *  - move back / fowrad
  *  - position move
  *  - tests on inserting arbitorary position
  *  - page break
@@ -78,19 +78,47 @@ ScreenModel.prototype.insert = function (character) {
         line.adoptWrapRules(this._rows, this._wrapRules);
         if (this.onUpdateLine)
             this.onUpdateLine(i);
-        if (nextLine == line.getNextLine() ||
-                nextPosition == line.getNextLinePosition())
+        if (nextLine == line.getNextLine() &&
+                nextPosition == line.getNextLinePosition()) {
             break;
+        }
         if (i + 1 == length) {
-            // TODO: Page break.
-            break;
+            // TODO: Page handling.
         }
         this._lines[i + 1].updateContents(
                 this._rows, line.getNextLine(), line.getNextLinePosition());
     }
     // TODO: Update cursor correctly.
-    if (this.onMove)
-        this.onMove(this._cursor.line, this._cursor.row);
+    this.setCursor(this._cursor.line, this._cursor.row);
+};
+
+/**
+ *  Remove a character from the current position.
+ */
+ScreenModel.prototype.remove = function () {
+    var removed = false;
+    var length = this._lines.length;
+    for (var i = this._cursor.line; i < length; ++i) {
+        var line = this._lines[i];
+        var nextLine = line.getNextLine();
+        var nextPosition = line.getNextLinePosition();
+        if (!removed) {
+            removed = true;
+            line.removeAt(this._cursor.row);
+        }
+        line.adoptWrapRules(this._rows, this._wrapRules);
+        if (this.onUpdateLine)
+            this.onUpdateLine(i);
+        if (nextLine == line.getNextLine() &&
+                nextPosition == line.getNextLinePosition())
+            break;
+        if (i + 1 == length) {
+            // TODO: Page handling.
+        }
+        this._lines[i + 1].updateContents(
+                this._rows, line.getNextLine(), line.getNextLinePosition());
+    }
+    // TODO: Update cursor correctly.
 };
 
 /**
@@ -123,6 +151,30 @@ ScreenModel.prototype.getCursorLine = function () {
  */
 ScreenModel.prototype.getCursorRow = function () {
     return this._cursor.row;
+};
+
+/**
+ * Set cursor.
+ * @param line {number} The current line position.
+ * @param row {number} The current row position.
+ */
+ScreenModel.prototype.setCursor = function (line, row) {
+    this._cursor.line = line;
+    this._cursor.row = row;
+    if (this.onMove)
+        this.onMove(line, row);
+    //console.log('cursor (' + line + ', ' + row + ')');
+};
+
+/**
+ * Create a string that represent screen image. This is mainly for testing.
+ * @return {string} A string representing screen.
+ */
+ScreenModel.prototype.toString = function () {
+    var lines = [];
+    for (var i = 0; i < this._rows; ++i)
+        lines.push(this._lines[i].toString());
+    return lines.join('\n');
 };
 
 /**
@@ -234,8 +286,33 @@ ScreenModel.Line.prototype.getCharacterAt = function (row) {
  */
 ScreenModel.Line.prototype.insertCharacterAt = function (row, character) {
     var position = this._position + row;
-    if (this._line.getPosition() != position - 1)
-        this._line.at(position);
+    if (this._line.getPosition() != -1)
+        this._line.at(position - 1);
     this._line.insert(new TextModel.Cell(character));
     this.updateContents(this._rows, this._line, this._position);
+};
+
+/**
+ * Remove a character at the position in a line.
+ * @param row {number} Row position in a line.
+ */
+ScreenModel.Line.prototype.removeAt = function (row) {
+    var position = this._position + row;
+    this._line.at(position);
+    this._line.remove();
+};
+
+/**
+ * Create a string that represent a line image. This is mainly for testing.
+ * @return {string} A string representing ascreen line.
+ */
+ScreenModel.Line.prototype.toString = function () {
+    if (this._line == null)
+        return '';
+    var cells = [];
+    var length = this._line.getLength();
+    for (var i = 0; i < length; ++i)
+        cells.push(this.getCharacterAt(i));
+    return cells.join('') + '  // ' + this.getNextLinePosition() + ' @ ' +
+            this.getNextLine();
 };
