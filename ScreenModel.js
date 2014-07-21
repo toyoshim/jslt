@@ -7,7 +7,6 @@
 /**
  * ScreenModel class.
  * TODO:
- *  - cursor calculation.
  *  - position move
  *  - line break
  *  - page break
@@ -34,8 +33,8 @@ function ScreenModel (lines, rows, line, position) {
         group: ''  // TODO
     };
     for (var i = 0; i < lines; ++i) {
-        this._lines[i] = new ScreenModel.Line(rows, line, position);
-        this._lines[i].adoptWrapRules(rows, this._wrapRules);
+        this._lines[i] = new ScreenModel.Line(
+                rows, line, position, this._wrapRules);
         line = this._lines[i].getNextLine();
         position = this._lines[i].getNextLinePosition();
     }
@@ -64,70 +63,54 @@ ScreenModel.prototype.getCharacterAt = function (line, row) {
  * @param character {string} A Unicode character in UTF-16.
  */
 ScreenModel.prototype.insert = function (character) {
-    var line = this._lines[this._cursor.line];
-    line.insertCharacterAt(this._cursor.row++, character);
-    var cursorLine = line.getCurrentLine();
-    var cursorRawPosition = line.getCurrentLinePosition() + this._cursor.row;
-
-    // TODO: Reduce unnesessary updates on unmodified lines.
-    var length = this._lines.length;
-    var i = this._cursor.line - 1;
-    if (i < 0)
-        i = 0;
-    for (; i < length; ++i) {
-        line = this._lines[i];
-        line.adoptWrapRules(this._rows, this._wrapRules);
-        if (this.onUpdateLine)
-            this.onUpdateLine(i);
-        if (i + 1 == length) {
-            // TODO: Page handling.
-        } else {
-            this._lines[i + 1].updateContents(
-                    this._rows, line.getNextLine(), line.getNextLinePosition());
-        }
-        // Check cursor position.
-        if (line.getCurrentLine() != cursorLine)
-            continue;
-        if (line.getCurrentLinePosition() > cursorRawPosition)
-            continue;
-        if (line.getNextLine == cursorLine &&
-                line.getNextLinePosition() >= cursorRawPosition)
-            continue;
-        this._cursor.line = i;
-        this._cursor.row = cursorRawPosition - line.getCurrentLinePosition();
-    }
-    // TODO: If cursor locates at the last position, we may want to move it to
-    // the first place in the next line.
-    this.setCursor(this._cursor.line, this._cursor.row);
+    this._lines[this._cursor.line].insertCharacterAt(
+            this._cursor.row, character);
+    this.updateLayout();
+    this.moveForward();
 };
 
 /**
  *  Remove a character from the current position.
  */
 ScreenModel.prototype.remove = function () {
-    var removed = false;
-    var length = this._lines.length;
-    for (var i = this._cursor.line; i < length; ++i) {
-        var line = this._lines[i];
-        var nextLine = line.getNextLine();
-        var nextPosition = line.getNextLinePosition();
-        if (!removed) {
-            removed = true;
-            line.removeAt(this._cursor.row);
-        }
-        line.adoptWrapRules(this._rows, this._wrapRules);
+    var line = this._lines[this._cursor.line];
+    line.removeAt(this._cursor.row);
+    this.updateLayout();
+}
+
+/**
+ * Update screen layout.
+ */
+ScreenModel.prototype.updateLayout = function () {
+    // TODO: Reduce unnesessary updates on unmodified lines.
+    var cursorLine = this._lines[this._cursor.line];
+    var cursorLineList = cursorLine.getCurrentLine();
+    var cursorLinePosition =
+            cursorLine.getCurrentLinePosition() + this._cursor.row;
+
+    var lines = this._lines.length;
+    var line = this._lines[0].getCurrentLine();
+    var position = this._lines[0].getCurrentLinePosition();
+    for (var i = 0; i < lines; ++i) {
+        this._lines[i].reset(this._rows, line, position, this._wrapRules);
+        line = this._lines[i].getNextLine();
+        position = this._lines[i].getNextLinePosition();
         if (this.onUpdateLine)
             this.onUpdateLine(i);
-        if (nextLine == line.getNextLine() &&
-                nextPosition == line.getNextLinePosition())
-            break;
-        if (i + 1 == length) {
-            // TODO: Page handling.
-        }
-        this._lines[i + 1].updateContents(
-                this._rows, line.getNextLine(), line.getNextLinePosition());
+
+        // Check cursor position.
+        if (this._lines[i].getCurrentLine() != cursorLineList)
+            continue;
+        if (this._lines[i].getCurrentLinePosition() > cursorLinePosition)
+            continue;
+        if (this._lines[i].getNextLine == cursorLineList &&
+                this._lines[i].getNextLinePosition() >= cursorLinePosition)
+            continue;
+        this._cursor.line = i;
+        this._cursor.row =
+                cursorLinePosition - this._lines[i].getCurrentLinePosition();
     }
-    // TODO: Update cursor correctly.
+    this.setCursor(this._cursor.line, this._cursor.row);
 };
 
 /**
@@ -135,7 +118,8 @@ ScreenModel.prototype.remove = function () {
  * @return {object} TextModel.List object that contains contents.
  */
 ScreenModel.prototype.getNextLine = function () {
-    return this._lines[this._rows - 1].getNextLine();
+    var last = this._lines.length - 1;
+    return this._lines[last].getNextLine();
 };
 
 /**
@@ -143,7 +127,8 @@ ScreenModel.prototype.getNextLine = function () {
  * @return {number} The position that the next page starts in the next line.
  */
 ScreenModel.prototype.getNextLinePosition = function () {
-    return this._lines[this._rows - 1].getNextLinePosition();
+    var last = this._lines.length - 1;
+    return this._lines[last].getNextLinePosition();
 };
 
 /**
@@ -181,9 +166,14 @@ ScreenModel.prototype.setCursor = function (line, row) {
 ScreenModel.prototype.moveForward = function () {
     var row = this._cursor.row;
     var line = this._cursor.line;
-    if (row == this._rows || this._lines[line].getCharacterAt(row + 1) == '') {
+    var dangling = row == this._rows;
+    var fullfilled = row == this._rows - 1;
+    var nextLine = this._lines[line].getNextLine();
+    var wrapping = this._lines[line].getCharacterAt(row + 1) == '' &&
+            nextLine == this._lines[line].getCurrentLine();
+    if (dangling || fullfilled || wrapping) {
         // Go to the next line home if possible.
-        if (this._lines[line].getNextLine() == null)
+        if (nextLine == null)
             return false;
         // TODO: Page handling.
         this.setCursor(this._cursor.line + 1, 0);
@@ -216,27 +206,33 @@ ScreenModel.prototype.moveBackward = function () {
  */
 ScreenModel.prototype.toString = function () {
     var lines = [];
-    for (var i = 0; i < this._rows; ++i)
+    var length = this._lines.length;
+    for (var i = 0; i < length; ++i)
         lines.push(this._lines[i].toString());
     return lines.join('\n');
 };
 
 /**
  * ScreenModel.Line class.
- * @param rows {number} Line height in rows.
- * @param line {object} TextModel.TextList object that contains contents.
+ * @param rows {number} Line length.
+ * @param line {Object} TextModel.List object that contains contents.
  * @param position {number} The first character position in |line|.
+ * @param rules {Object} Wrap rules.
  * @constructor
  */
-ScreenModel.Line = function (rows, line, position) {
-    this.updateContents(rows, line, position);
+ScreenModel.Line = function (rows, line, position, rules) {
+    this.reset(rows, line, position, rules);
 };
 
 
 /**
- * Update contents.
+ * Set contents.
+ * @param rows {number} Line length.
+ * @param line {Object} TextModel.List object that contains contents.
+ * @param position {number} The first character position in |line|.
+ * @param rules {Object} Wrap rules.
  */
-ScreenModel.Line.prototype.updateContents = function (rows, line, position) {
+ScreenModel.Line.prototype.reset = function (rows, line, position, rules) {
     this._rows = rows;
     this._line = line;
     this._position = position;
@@ -245,59 +241,38 @@ ScreenModel.Line.prototype.updateContents = function (rows, line, position) {
         this._nextPosition = 0;
         return;
     }
-    var length = line.getLength() - position;
-    if (length > rows || (length == rows && line.next == null)) {
+    var maxLength = line.getLength() - position;
+    var length = Math.min(rows, maxLength);
+    var next = (maxLength > length) ? line.at(position + length) : null;
+    var nextNext =
+            (maxLength > length + 1) ? line.at(position + length + 1) : null;
+    // Dangline rule check.
+    if ((nextNext == null || rules.lineStart.indexOf(nextNext.character) < 0) &&
+            (next && rules.dangling.indexOf(next.character) >= 0)) {
+        this._rows = length + 1;
+    } else {
+        for (; length > 0; --length) {
+            // Line start rule check.
+            if (length < maxLength && rules.lineStart.indexOf(
+                    line.at(position + length).character) >= 0)
+                continue;
+            // Line end rule check.
+            if (rules.lineEnd.indexOf(
+                    line.at(position + length - 1).character) >= 0)
+                continue;
+            this._rows = length;
+            break;
+        }
+    }
+
+    if ((maxLength == this._rows && maxLength >= rows && line.next == null) ||
+            maxLength > this._rows) {
         this._nextLine = line;
-        this._nextPosition = position + rows;
+        this._nextPosition = position + this._rows;
     } else {
         this._nextLine = line.next;
         this._nextPosition = 0;
     }
-};
-
-/**
- * Adopt wrap rules.
- * @param rows {number} Default rows in line.
- * @param rules {Object} Wrap rules.
- */
-ScreenModel.Line.prototype.adoptWrapRules = function (rows, rules) {
-    this._rows = rows;
-    var line = this._line;
-    if (line == null || this._nextLine != line)
-        return;
-
-    var position = this._position;
-    var length = line.getLength() - position;
-    var nextNext = null;
-    if (length > this._rows) {
-        var next = line.at(position + this._rows);
-        nextNext = next.getNext();
-    }
-    // Dangline rule check.
-    if ((nextNext == null || rules.lineStart.indexOf(nextNext.character) < 0) &&
-            (next != null && rules.dangling.indexOf(next.character) >= 0)) {
-        ++this._rows;
-        if (length == this._rows) {
-            this._nextLine = line.next;
-            this._nextPosition = 0;
-        } else {
-            ++this._nextPosition;
-        }
-        return;
-    }
-    if (length <= rows)
-        rows = length - 1;
-    for (; rows > 0; --rows) {
-        // Line start rule check.
-        if (rules.lineStart.indexOf(line.at(position + rows).character) >= 0)
-            continue;
-        // Line end rule check.
-        if (rules.lineEnd.indexOf(line.at(position + rows - 1).character) >= 0)
-            continue;
-        this._rows = rows;
-        break;
-    }
-    this._nextPosition = position + this._rows;
 };
 
 /**
@@ -354,7 +329,6 @@ ScreenModel.Line.prototype.insertCharacterAt = function (row, character) {
     var position = this._position + row;
     this._line.at(position - 1);
     this._line.insert(new TextModel.Cell(character));
-    this.updateContents(this._rows, this._line, this._position);
 };
 
 /**
