@@ -8,9 +8,8 @@
  * ScreenModel class.
  * TODO:
  *  - cursor calculation.
- *  - move back / fowrad
  *  - position move
- *  - tests on inserting arbitorary position
+ *  - line break
  *  - page break
  * @author Takashi Toyoshima <toyoshim@gmail.com>
  * @param lines {number} Screen width in line.
@@ -163,41 +162,42 @@ ScreenModel.prototype.setCursor = function (line, row) {
     this._cursor.row = row;
     if (this.onMove)
         this.onMove(line, row);
-    //console.log('cursor (' + line + ', ' + row + ')');
 };
 
 /**
  * Move cursor position forward.
+ * @return {boolean} true if success.
  */
 ScreenModel.prototype.moveForward = function () {
-    var row = this._corsor.row;
+    var row = this._cursor.row;
     var line = this._cursor.line;
     if (row == this._rows || this._lines[line].getCharacterAt(row + 1) == '') {
         // Go to the next line home if possible.
         if (this._lines[line].next == null)
-            return;
+            return false;
         // TODO: Page handling.
-        ++this._cursor.line;
-        this._cursor.row = 0;
-        return;
+        this.setCursor(this._cursor.line + 1, 0);
+        return true;
     }
-    ++thir._cursor.row;
+    this.setCursor(this._cursor.line, this._cursor.row + 1);
+    return true;
 };
 
 /**
  * Move cursor position backward.
+ * @return {boolean} true if success.
  */
 ScreenModel.prototype.moveBackward = function () {
     if (this._cursor.row == 0) {
         // Go to the previous line home if possible.
         if (this._lines[this._cursor.line].previous == null)
-            return;
+            return false;
         // TODO: Page handling.
-        --this._cursor.line;
-        this._cursor.row = 0;
-        return;
+        this.setCursor(this._cursor.line - 1, 0);
+        return true;
     }
-    --thir._cursor.row;
+    this.setCursor(this._cursor.line, this._cursor.row - 1);
+    return true;
 };
 
 /**
@@ -320,8 +320,7 @@ ScreenModel.Line.prototype.getCharacterAt = function (row) {
  */
 ScreenModel.Line.prototype.insertCharacterAt = function (row, character) {
     var position = this._position + row;
-    if (this._line.getPosition() != -1)
-        this._line.at(position - 1);
+    this._line.at(position - 1);
     this._line.insert(new TextModel.Cell(character));
     this.updateContents(this._rows, this._line, this._position);
 };
