@@ -167,6 +167,40 @@ ScreenModel.prototype.setCursor = function (line, row) {
 };
 
 /**
+ * Move cursor position forward.
+ */
+ScreenModel.prototype.moveForward = function () {
+    var row = this._corsor.row;
+    var line = this._cursor.line;
+    if (row == this._rows || this._lines[line].getCharacterAt(row + 1) == '') {
+        // Go to the next line home if possible.
+        if (this._lines[line].next == null)
+            return;
+        // TODO: Page handling.
+        ++this._cursor.line;
+        this._cursor.row = 0;
+        return;
+    }
+    ++thir._cursor.row;
+};
+
+/**
+ * Move cursor position backward.
+ */
+ScreenModel.prototype.moveBackward = function () {
+    if (this._cursor.row == 0) {
+        // Go to the previous line home if possible.
+        if (this._lines[this._cursor.line].previous == null)
+            return;
+        // TODO: Page handling.
+        --this._cursor.line;
+        this._cursor.row = 0;
+        return;
+    }
+    --thir._cursor.row;
+};
+
+/**
  * Create a string that represent screen image. This is mainly for testing.
  * @return {string} A string representing screen.
  */
