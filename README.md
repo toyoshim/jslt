@@ -6,6 +6,10 @@ A JavaScript Library collection
 
 `ArrayBuffer` ArrayBuffer compatible library for old (version < 0.5.5) node.js.
 
+`Directory` An abstract class to represent directory operation.
+
+- `TarDirectory` Tar file backed Directory.
+
 `DNS` DNS client using chrome.socket for Chrome App.
 
 `File` An abstract class to represent file operation.

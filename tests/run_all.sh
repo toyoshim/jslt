@@ -47,6 +47,7 @@ run_test File_test.js
 run_test MD5_test.js
 run_test Promise_test.js
 run_test ScreenModel_test.js
+run_test TarDirectory_test.js
 run_test TextModel_test.js
 run_test TextModelConvert_test.js
 run_test Unicode_test.js
