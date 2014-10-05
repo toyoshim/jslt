@@ -1,7 +1,8 @@
 jslt
 ====
+[![Build Status](https://drone.io/github.com/toyoshim/jslt/status.png)](https://drone.io/github.com/toyoshim/jslt/latest)
 
-A JavaScript Library collection [![Build Status](https://drone.io/github.com/toyoshim/jslt/status.png)](https://drone.io/github.com/toyoshim/jslt/latest)
+A JavaScript Library collection
 
 `ArrayBuffer` ArrayBuffer compatible library for old (version < 0.5.5) node.js.
 
