@@ -93,7 +93,7 @@ TarDirectory.prototype._parseAnEntry = function (offset) {
                  this._buffer[offset + 264] == 0;
     // TODO: support pax (POSIX.1-2001) tar format.
     if (magic != 'ustar')
-        throw Error('unknown magic in tar header');
+        throw Error('unknown magic in tar header: ' + magic);
     if (!ustar && !gnutar) {
         console.error('magic is not ustar or gnutar');
         console.log(this._buffer.subarray(offset + 257, offset + 257 + 8));
@@ -104,18 +104,19 @@ TarDirectory.prototype._parseAnEntry = function (offset) {
         name = name.substr(2);
     if (name[0] == '/')
         name = name.substr(1);
-    var size = this._getNumber(offset + 124, 12);
-    var blockSize = (size + 511) & ~0x1ff;
+    var size = 0;
     var type = this._buffer[offset + 156];
     var regtype = '0'.charCodeAt(0);
     var dirtype = '5'.charCodeAt(0);
     if (type == regtype || type == 0) {
+        size = this._getNumber(offset + 124, 12);
         this._registerFile(name, size, offset + 512);
     } else if (type == dirtype) {
         this._registerDirectory(name);
     } else {
         console.error('skip unknown file type ' + String.fromCharCode(type));
     }
+    var blockSize = (size + 511) & ~0x1ff;
     return 512 + blockSize;
 };
 
@@ -178,19 +179,19 @@ TarDirectory.prototype._getString = function (offset, size) {
 TarDirectory.prototype._getNumber = function (offset, size) {
     var n = 0;
     var zero = '0'.charCodeAt(0);
-    var nine = '9'.charCodeAt(0);
+    var seven = '7'.charCodeAt(0);
     for (var i = 0; i < size; ++i) {
         var c = this._buffer[offset + i];
         var error = false;
         if (i == (size - 1))
-            error = c != 0;
+            error = (c != 0 && c != 0x20);
         else
-            error = c < zero || nine < c;
+            error = c < zero || seven < c;
         if (error)
-            throw Error('unexpected character for a number parameter');
+            throw Error('unexpected character for a number parameter: ' + c);
         if (i == (size - 1))
             break;
-        n = n * 10 + c - zero;
+        n = n * 8 + c - zero;
     }
     return n;
 };
