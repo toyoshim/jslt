@@ -8,6 +8,8 @@ A JavaScript Library collection
 
 `DNS` DNS client using chrome.socket for Chrome App.
 
+`File` An abstract class to represent file operation.
+
 `MD5` MD5 hash calculator.
 
 `Promise` Promise compatible library for node.js and browsers that does not support Promise.

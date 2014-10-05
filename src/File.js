@@ -27,12 +27,12 @@ File.NOT_SUPPORTED = 1;
  * Reads data. Success callback of Promise is called when read operation
  * successes, otherwise error callback is called. Success callback is invoked
  * with an result argument {Object} containing size {Number} for actual read
- * size, and buffer {ArrayBuffer} for buffer to store read data. If |buffer|
- * is not specified in arguments, new ArrayBuffer created internally is set.
+ * size, and buffer {Uint8Array} for buffer to store read data. If |buffer|
+ * is not specified in arguments, new Uint8Array created internally is set.
  * Error callback is invoked with an error argument {Object} containing status
  * {Number} for failure reason, e.g. File.NOT_SUPPORTED.
  * @param size size to read in byte.
- * @param buffer {ArrayByffer} buffer to store read data (optional)
+ * @param buffer {Uint8Array} buffer to store read data (optional)
  * @return {Promise}
  */
 File.prototype.read = function (size, buffer) {
@@ -46,7 +46,7 @@ File.prototype.read = function (size, buffer) {
  * successes, otherwise error callback is called. Success callback is invoked
  * without argument, and error callback is invoked with an error argument
  * {Object} containing status {Number} for failure reason.
- * @param buffer {ArrayBuffer} buffer containng data for writing.
+ * @param buffer {Uint8Array} buffer containng data for writing.
  * @return {Promise}
  */
 File.prototype.write = function (buffer) {

@@ -33,7 +33,7 @@ assert.ok(called);
 console.log('[PASS] read test');
 
 called = false;
-file.write(new ArrayBuffer(0)).then(unexpectedCallback, notSupportedCallback);
+file.write(new Uint8Array(0)).then(unexpectedCallback, notSupportedCallback);
 assert.ok(called);
 console.log('[PASS] write test');
 
