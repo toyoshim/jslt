@@ -37,11 +37,14 @@ run_test () {
     echo
 }
 
+# Alphabetical order.
 run_test ArrayBuffer_test.js
 run_test DISABLED_chrome.socket_test.js
 run_test DNS_test.js
 run_test MD5_test.js
+run_test Promise_test.js
 run_test Unicode_test.js
+# Tests depends on something.
 run_test TextModel_test.js
 run_test TextModelConvert_test.js
 run_test ScreenModel_test.js
