@@ -7,9 +7,9 @@
  */
  
 assert = require('assert');
-TextModel = require('./TextModel').TextModel;
-Unicode = require('./Unicode').Unicode;
-TextModelConvert = require('./TextModelConvert').TextModelConvert;
+TextModel = require('../src/TextModel').TextModel;
+Unicode = require('../src/Unicode').Unicode;
+TextModelConvert = require('../src/TextModelConvert').TextModelConvert;
  
 assert.ok(TextModelConvert);
 console.log('[PASS] import test');

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A JavaScript library",
   "scripts": {
-    "test": "./test.sh"
+    "test": "./tests/run_all.sh"
   },
   "repository": {
     "type": "git",

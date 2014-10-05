@@ -7,10 +7,10 @@
  */
  
 assert = require('assert');
-Unicode = require('./Unicode').Unicode;
-TextModel = require('./TextModel').TextModel;
-TextModelConvert = require('./TextModelConvert').TextModelConvert;
-ScreenModel = require('./ScreenModel').ScreenModel;
+Unicode = require('../src/Unicode').Unicode;
+TextModel = require('../src/TextModel').TextModel;
+TextModelConvert = require('../src/TextModelConvert').TextModelConvert;
+ScreenModel = require('../src/ScreenModel').ScreenModel;
 
 assert.ok(ScreenModel);
 console.log('[PASS] import test');

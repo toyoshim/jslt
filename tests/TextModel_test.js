@@ -7,7 +7,7 @@
  */
  
 assert = require('assert');
-TextModel = require('./TextModel').TextModel;
+TextModel = require('../src/TextModel').TextModel;
  
 assert.ok(TextModel);
 assert.ok(TextModel.Cell);

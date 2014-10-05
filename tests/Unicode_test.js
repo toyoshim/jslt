@@ -7,7 +7,7 @@
  */
  
 assert = require('assert');
-Unicode = require('./Unicode').Unicode;
+Unicode = require('../src/Unicode').Unicode;
 
 assert.ok(Unicode);
 console.log('[PASS] import test');

@@ -13,15 +13,15 @@ if ((version[0] < 1) &&
     ((version[1] < 5) || ((version[1] == 5) && version[2] < 5))) {
     // version < 0.5.5
     console.log('Use compatible ArrayBuffer library');
-    ArrayBuffer = require('./ArrayBuffer').ArrayBuffer;
-    DataView = require('./ArrayBuffer').DataView;
-    Uint8Array = require('./ArrayBuffer').Uint8Array;
-    Uint32Array = require('./ArrayBuffer').Uint32Array;
+    ArrayBuffer = require('../src/ArrayBuffer').ArrayBuffer;
+    DataView = require('../src/ArrayBuffer').DataView;
+    Uint8Array = require('../src/ArrayBuffer').Uint8Array;
+    Uint32Array = require('../src/ArrayBuffer').Uint32Array;
 }
 
-chrome = require('./chrome.socket').chrome;
+chrome = require('../src/chrome.socket').chrome;
 
-DNS = require('./DNS').DNS;
+DNS = require('../src/DNS').DNS;
 assert.ok(DNS);
 console.log('[PASS] import test');
 

@@ -4,6 +4,13 @@ pass=0
 fail=0
 skip=0
 
+PWD=`pwd`
+DIR=`basename $PWD`
+if [ $DIR != "tests" ]; then
+  cd tests
+fi
+FAILED=""
+
 run_test () {
     echo "========================================"
     echo $1 | grep '^DISABLED_' > /dev/null 2> /dev/null
@@ -19,6 +26,7 @@ run_test () {
         else
             echo "* FAIL"
             fail=`expr $fail + 1`
+            FAILED="$FAILED\n  $1"
         fi
     else
         echo "Skip test $1"
@@ -41,6 +49,10 @@ run_test ScreenModel_test.js
 echo "========================================"
 echo "----------------------------------------"
 echo "Pass $pass / Fail $fail / Skip $skip"
+if [ $fail -ne 0 ]; then
+    echo "----------------------------------------"
+    echo "Failed tests:$FAILED"
+fi
 echo "----------------------------------------"
 echo "========================================"
 
