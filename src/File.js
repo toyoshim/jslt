@@ -7,6 +7,7 @@
 /**
  * File class.
  * @author Takashi Toyoshima <toyoshim@gmail.com>
+ * @constructor
  */
 function File () {
 }
@@ -22,6 +23,9 @@ File.END = 2;
 // Status code.
 File.OK = 0;
 File.NOT_SUPPORTED = 1;
+File.OUT_OF_RANGE = 2;
+File.INVALID = 3;
+File.STORAGE_FULL = 4;
 
 /**
  * Reads data. Success callback of Promise is called when read operation
@@ -31,8 +35,11 @@ File.NOT_SUPPORTED = 1;
  * is not specified in arguments, new Uint8Array created internally is set.
  * Error callback is invoked with an error argument {Object} containing status
  * {Number} for failure reason, e.g. File.NOT_SUPPORTED.
+ * If |buffer| is omitted, and buffer is created internally, caller can write
+ * to the buffer, but should not. It may be alias object to share the internal
+ * buffer to optimize performance.
  * @param size size to read in byte.
- * @param buffer {Uint8Array} buffer to store read data (optional)
+ * @param buffer {Uint8Array} buffer to store read data (optional).
  * @return {Promise}
  */
 File.prototype.read = function (size, buffer) {

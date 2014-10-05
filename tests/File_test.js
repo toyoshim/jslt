@@ -10,6 +10,7 @@ assert = require('assert');
 Promise = require('../src/Promise').Promise;
 File = require('../src/File').File;
 
+assert.ok(Promise);
 assert.ok(File);
 console.log('[PASS] import test');
 

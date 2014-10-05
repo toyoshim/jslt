@@ -39,6 +39,7 @@ run_test () {
 
 # Alphabetical order.
 run_test ArrayBuffer_test.js
+run_test ArrayBufferFile_test.js
 run_test DISABLED_chrome.socket_test.js
 run_test DNS_test.js
 run_test File_test.js

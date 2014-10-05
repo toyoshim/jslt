@@ -10,6 +10,8 @@ A JavaScript Library collection
 
 `File` An abstract class to represent file operation.
 
+- `ArrayBufferFile` ArrayBuffer backed File.
+
 `MD5` MD5 hash calculator.
 
 `Promise` Promise compatible library for node.js and browsers that does not support Promise.
