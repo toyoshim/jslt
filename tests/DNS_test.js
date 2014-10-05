@@ -7,18 +7,6 @@
  */
 
 assert = require('assert');
-
-var version = process.versions.node.split('.');
-if ((version[0] < 1) &&
-    ((version[1] < 5) || ((version[1] == 5) && version[2] < 5))) {
-    // version < 0.5.5
-    console.log('Use compatible ArrayBuffer library');
-    ArrayBuffer = require('../src/ArrayBuffer').ArrayBuffer;
-    DataView = require('../src/ArrayBuffer').DataView;
-    Uint8Array = require('../src/ArrayBuffer').Uint8Array;
-    Uint32Array = require('../src/ArrayBuffer').Uint32Array;
-}
-
 chrome = require('../src/chrome.socket').chrome;
 
 DNS = require('../src/DNS').DNS;

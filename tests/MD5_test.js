@@ -8,17 +8,6 @@
 
 assert = require('assert');
 MD5 = require('../src/MD5').MD5;
-
-var version = process.versions.node.split('.');
-if ((version[0] < 1) &&
-        ((version[1] < 5) || ((version[1] == 5) && version[2] < 5))) {
-    // version < 0.5.5
-    ArrayBuffer = require('../src/ArrayBuffer').ArrayBuffer;
-    DataView = require('../src/ArrayBuffer').DataView;
-    Uint8Array = require('../src/ArrayBuffer').Uint8Array;
-    Uint32Array = require('../src/ArrayBuffer').Uint32Array;
-}
-
 assert.ok(MD5);
 assert.ok(MD5.createDigestBinary);
 assert.ok(MD5.createDigestString);
