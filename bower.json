@@ -1,0 +1,16 @@
+{
+  "name": "jslt",
+  "version": "0.2.0",
+  "homepage": "https://github.com/toyoshim/jslt",
+  "authors": [
+    "Takashi Toyoshima <toyoshim@gmail.com>"
+  ],
+  "description": "A JavaScript Library collection",
+  "license": "New BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "tests"
+  ]
+}
