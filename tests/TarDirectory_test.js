@@ -74,3 +74,27 @@ assert.equal(1, z.length);
 assert.equal('1', z[0].name());
 assert.ok(z[0].isFile());
 console.log('[PASS] check expanded tar file contents');
+
+var longdata = (function (buffer) {
+    var data = new Uint8Array(buffer.length);
+    for (var i = 0; i < buffer.length; ++i)
+        data[i] = buffer[i];
+    return data.buffer;
+})(fs.readFileSync('data/long.tar'));
+assert.ok(longdata);
+console.log('[PASS] load test data for longname/longlink');
+
+var longtar = new TarDirectory(longdata);
+console.log('[PASS] long tar file is parsed correctly');
+
+var longentries = longtar.getEntries();
+assert.equal(1, longentries.length);
+assert.equal('long', longentries[0].name());
+assert.equal(true, longentries[0].isDirectory());
+
+var longdirentries = longentries[0].directory().getEntries();
+assert.equal('this-file-name-is-too-long-to-contain-it-in-traditional-' +
+             'tar-format-that-can-contain-100-characters-for-filename',
+             longdirentries[0].name());
+assert.equal(false, longdirentries[0].isDirectory());
+console.log('[PASS] check expanded long tar file contents');

@@ -21,6 +21,8 @@ function TarDirectory (buffer, offset, size) {
     if (!size)
         size = buffer.byteLength - offset;
     this._buffer = new Uint8Array(buffer, offset, size);
+    this.longname = null;
+    this.longlink = null;
     this._parse();
 }
 try {
@@ -99,20 +101,45 @@ TarDirectory.prototype._parseAnEntry = function (offset) {
         console.log(this._buffer.subarray(offset + 257, offset + 257 + 8));
     }
 
-    var name = this._getString(offset, 100);
-    if (name[0] == '.' && name[1] == '/')
-        name = name.substr(2);
-    if (name[0] == '/')
-        name = name.substr(1);
+    // If the previous entry has a longname type, the current entry uses it
+    // as a name.
+    var name = this._longname;
+    this._longname = null;
+    if (!name) {
+        name = this._getString(offset, 100);
+        if (name[0] == '.' && name[1] == '/')
+            name = name.substr(2);
+        if (name[0] == '/')
+            name = name.substr(1);
+    }
     var size = 0;
     var type = this._buffer[offset + 156];
     var regtype = '0'.charCodeAt(0);
+    var symtype = '2'.charCodeAt(0);
     var dirtype = '5'.charCodeAt(0);
+    var longlinktype = 'K'.charCodeAt(0);
+    var longnametype = 'L'.charCodeAt(0);
     if (type == regtype || type == 0) {
         size = this._getNumber(offset + 124, 12);
+        console.log('file: ' + name + ', size: ' + size);
         this._registerFile(name, size, offset + 512);
+    } else if (type == symtype) {
+        var linkname = this._longlinkname;
+        this._longlinkname = null;
+        if (!linkname)
+          linkname = this._getString(offset + 157, 100);
+        console.log('skip symlink: ' + name + ' -> ' + linkname);
     } else if (type == dirtype) {
+        console.log('dir: ' + name);
         this._registerDirectory(name);
+    } else if (type == longlinktype) {
+        size = this._getNumber(offset + 124, 12);
+        name = this._getString(offset + 512, size);
+        this._longlink = name;
+    } else if (type == longnametype) {
+        size = this._getNumber(offset + 124, 12);
+        name = this._getString(offset + 512, size);
+        this._longname = name;
     } else {
         console.error('skip unknown file type ' + String.fromCharCode(type));
     }
