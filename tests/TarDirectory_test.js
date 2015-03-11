@@ -114,12 +114,4 @@ var paxentries = paxtar.getEntries();
 assert.equal(1, paxentries.length);
 assert.equal('with_global_extended_header', paxentries[0].name());
 assert.equal(false, paxentries[0].isDirectory());
-
-/*
-var longdirentries = longentries[0].directory().getEntries();
-assert.equal('this-file-name-is-too-long-to-contain-it-in-traditional-' +
-             'tar-format-that-can-contain-100-characters-for-filename',
-             longdirentries[0].name());
-assert.equal(false, longdirentries[0].isDirectory());
-console.log('[PASS] check expanded long tar file contents');
-*/
+console.log('[PASS] check expanded pax file contents');
