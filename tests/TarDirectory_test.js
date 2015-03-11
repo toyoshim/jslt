@@ -98,3 +98,28 @@ assert.equal('this-file-name-is-too-long-to-contain-it-in-traditional-' +
              longdirentries[0].name());
 assert.equal(false, longdirentries[0].isDirectory());
 console.log('[PASS] check expanded long tar file contents');
+
+var paxdata = (function (buffer) {
+    var data = new Uint8Array(buffer.length);
+    for (var i = 0; i < buffer.length; ++i)
+        data[i] = buffer[i];
+    return data.buffer;
+})(fs.readFileSync('data/pax.tar'));
+assert.ok(paxdata);
+console.log('[PASS] load test data for global extended header');
+
+var paxtar = new TarDirectory(paxdata);
+console.log('[PASS] pax tar file is parsed correctly');
+var paxentries = paxtar.getEntries();
+assert.equal(1, paxentries.length);
+assert.equal('with_global_extended_header', paxentries[0].name());
+assert.equal(false, paxentries[0].isDirectory());
+
+/*
+var longdirentries = longentries[0].directory().getEntries();
+assert.equal('this-file-name-is-too-long-to-contain-it-in-traditional-' +
+             'tar-format-that-can-contain-100-characters-for-filename',
+             longdirentries[0].name());
+assert.equal(false, longdirentries[0].isDirectory());
+console.log('[PASS] check expanded long tar file contents');
+*/

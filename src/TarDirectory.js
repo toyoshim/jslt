@@ -117,21 +117,32 @@ TarDirectory.prototype._parseAnEntry = function (offset) {
     var regtype = '0'.charCodeAt(0);
     var symtype = '2'.charCodeAt(0);
     var dirtype = '5'.charCodeAt(0);
+    var gextype = 'g'.charCodeAt(0);
+    var exttype = 'x'.charCodeAt(0);
     var longlinktype = 'K'.charCodeAt(0);
     var longnametype = 'L'.charCodeAt(0);
     if (type == regtype || type == 0) {
         size = this._getNumber(offset + 124, 12);
-        console.log('file: ' + name + ', size: ' + size);
         this._registerFile(name, size, offset + 512);
     } else if (type == symtype) {
-        var linkname = this._longlinkname;
-        this._longlinkname = null;
+        var linkname = this._longlink;
+        this._longlink = null;
         if (!linkname)
           linkname = this._getString(offset + 157, 100);
-        console.log('skip symlink: ' + name + ' -> ' + linkname);
+        // Do nothing for symlinks now.
+        console.warn('skip symlink: ' + name + ' -> ' + linkname);
     } else if (type == dirtype) {
-        console.log('dir: ' + name);
         this._registerDirectory(name);
+    } else if (type == gextype) {
+        // Global extended header (pax extended header; See POSIX.1-2001).
+        // Usually used for comments on the archive, or something.
+        // We can skip it safely.
+        size = this._getNumber(offset + 124, 12);
+    } else if (type == exttype) {
+        // Extended header for the next file (POSIX.1-2001).
+        // This is used for mtime, atime, and ctime by tar --format=pax.
+        // We can skip it safely.
+        size = this._getNumber(offset + 124, 12);
     } else if (type == longlinktype) {
         size = this._getNumber(offset + 124, 12);
         name = this._getString(offset + 512, size);
@@ -141,6 +152,8 @@ TarDirectory.prototype._parseAnEntry = function (offset) {
         name = this._getString(offset + 512, size);
         this._longname = name;
     } else {
+        // Unknown type must have a right size value for skipping it safely.
+        size = this._getNumber(offset + 124, 12);
         console.error('skip unknown file type ' + String.fromCharCode(type));
     }
     var blockSize = (size + 511) & ~0x1ff;
