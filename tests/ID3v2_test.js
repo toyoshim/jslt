@@ -36,3 +36,6 @@ console.log('[PASS] id3 album title is parsed correctly');
 
 assert.equal(id3.artist(), 'とよしまハウス');
 console.log('[PASS] id3 album artist is parsed correctly');
+
+assert.equal(id3.imageType(), 'image/jpeg');
+console.log('[PASS] id3 image picture MIME type is parsed correctly');

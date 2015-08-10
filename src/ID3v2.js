@@ -24,6 +24,7 @@ function ID3v2 (buffer, offset, size) {
     this._artist = '';
     this._album = '';
     this._image = null;
+    this._imageType = 'image/x-unknown';
     this._error = this._parse(new DataView(buffer, offset, size));
 }
 try {
@@ -164,6 +165,7 @@ ID3v2.prototype._parse = function (data) {
             var imageSize = offset + i + 10 + frameSize - commentPos;
             this._image =
                     data.buffer.slice(imageOffset, imageOffset + imageSize);
+            this._imageType = mime;
         } else if (frameId == 'TYER' ||  // Year
                    frameId == 'TRCK' ||  // Track number/Position in set
                    frameId == 'TPOS' ||  // Part of a set
@@ -227,5 +229,13 @@ ID3v2.prototype.artist = function () {
  */
 ID3v2.prototype.image = function () {
     return this._image;
+};
+
+/**
+ * Get image data type.
+ * @return image data MIME type in string.
+ */
+ID3v2.prototype.imageType = function () {
+    return this._imageType;
 };
 
