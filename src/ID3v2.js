@@ -140,7 +140,7 @@ ID3v2.prototype._parse = function (data) {
         } else if (frameId == 'APIC') {
             var commentCode = data.getUint8(offset + i + 10);
             var mime = parseASCII(data, offset + i + 11, frameSize - 1);
-            var commentOffset = offset + i + 11 + mime.length;
+            var commentOffset = offset + i + 11 + mime.length + 1;
             var commentPos = commentOffset;
             var commentNext = commentOffset + 64;
             var comment;
