@@ -44,6 +44,7 @@ run_test Directory_test.js
 run_test DISABLED_chrome.socket_test.js
 run_test DNS_test.js
 run_test File_test.js
+run_test ID3v2_test.js
 run_test MD5_test.js
 run_test Promise_test.js
 run_test ScreenModel_test.js

@@ -1,6 +1,6 @@
 {
   "name": "jslt",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "A JavaScript Library collection",
   "scripts": {
     "test": "./tests/run_all.sh"

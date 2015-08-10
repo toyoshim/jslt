@@ -16,6 +16,8 @@ A JavaScript Library collection
 
 - `ArrayBufferFile` ArrayBuffer backed File.
 
+`ID3v2` ID3 v2 tag decode library.
+
 `MD5` MD5 hash calculator.
 
 `Promise` Promise compatible library for node.js and browsers that does not support Promise.
